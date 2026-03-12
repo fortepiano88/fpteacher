@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Fortepiano — Teacher App</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410;
+    --paper: #faf7f2;
+    --cream: #f2ede4;
+    --gold: #c9933a;
+    --gold-light: #e8b86d;
+    --rust: #c25c3a;
+    --sage: #5a7a5c;
+    --muted: #8a8278;
+    --border: #e0d8cc;
+    --white: #ffffff;
+    --shadow: 0 2px 16px rgba(26,20,16,0.10);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 18px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-brand { font-family: 'DM Serif Display', serif; font-size: 22px; letter-spacing: 0.02em; color: var(--gold-light); }
+  .header-teacher { font-size: 13px; color: var(--muted); font-weight: 400; }
+  .header-teacher span { color: var(--paper); font-weight: 500; }
+
+  .main { flex: 1; padding: 20px 16px 40px; max-width: 480px; margin: 0 auto; width: 100%; }
+
+  .date-strip {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .date-icon { font-size: 18px; }
+  .date-text { font-size: 14px; color: var(--muted); }
+  .date-text strong { color: var(--ink); font-weight: 600; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+
+  .student-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+
+  .student-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .student-card:hover { border-color: var(--gold); }
+  .student-card.selected { border-color: var(--gold); background: #fffbf4; box-shadow: 0 0 0 3px rgba(201,147,58,0.12); }
+  .student-card.submitted { opacity: 0.55; pointer-events: none; }
+
+  .student-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px; color: var(--gold); flex-shrink: 0;
+  }
+  .student-info { flex: 1; }
+  .student-name { font-weight: 500; font-size: 15px; color: var(--ink); }
+
+  .student-check {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s; flex-shrink: 0; font-size: 12px;
+  }
+  .student-card.selected .student-check { background: var(--gold); border-color: var(--gold); color: white; }
+
+  .submitted-badge {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 100px;
+    background: var(--cream); color: var(--muted);
+  }
+  .att-done-attended .submitted-badge { background: #f0faf0; color: var(--sage); }
+  .att-done-absent .submitted-badge { background: #fdf4f2; color: var(--rust); }
+  .att-done-rescheduled .submitted-badge { background: #fdf8ef; color: var(--gold); }
+
+  .attendance-section { margin-bottom: 24px; }
+  .attendance-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .att-btn {
+    border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 8px;
+    cursor: pointer; text-align: center; background: var(--white);
+    transition: all 0.18s ease; font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500; color: var(--muted);
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+  }
+  .att-btn .att-icon { font-size: 20px; }
+  .att-btn:hover { border-color: var(--gold); color: var(--ink); }
+  .att-btn.selected-attended { background: #f0faf0; border-color: var(--sage); color: var(--sage); }
+  .att-btn.selected-absent { background: #fdf4f2; border-color: var(--rust); color: var(--rust); }
+  .att-btn.selected-rescheduled { background: #fdf8ef; border-color: var(--gold); color: var(--gold); }
+
+  .field-group { margin-bottom: 20px; }
+  .field-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block;
+  }
+  textarea {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--ink); background: var(--white); resize: none; outline: none;
+    transition: border-color 0.18s; line-height: 1.5;
+  }
+  textarea:focus { border-color: var(--gold); }
+  textarea::placeholder { color: #bfb8ae; }
+
+  .submit-btn {
+    width: 100%; background: var(--ink); color: var(--paper); border: none;
+    border-radius: 14px; padding: 16px; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    letter-spacing: 0.02em; margin-top: 4px;
+  }
+  .submit-btn:hover { background: #2d2520; transform: translateY(-1px); box-shadow: var(--shadow); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
+
+  .wa-section {
+    display: none; background: var(--white); border: 1.5px solid #25D366;
+    border-radius: 16px; padding: 20px; margin-top: 20px;
+    animation: slideUp 0.3s ease;
+  }
+  .wa-section.show { display: block; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .wa-title { font-size: 13px; font-weight: 600; color: #1a8a3a; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .wa-preview {
+    background: #f0fdf4; border-radius: 10px; padding: 12px;
+    font-size: 13px; line-height: 1.6; color: var(--ink);
+    white-space: pre-wrap; margin-bottom: 14px; border: 1px solid #c3e6cb;
+  }
+  .wa-btn {
+    width: 100%; background: #25D366; color: white; border: none;
+    border-radius: 12px; padding: 14px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+  }
+  .wa-btn:hover { background: #1da851; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--ink); color: var(--paper);
+    padding: 12px 24px; border-radius: 100px;
+    font-size: 14px; font-weight: 500; transition: transform 0.3s ease;
+    z-index: 999; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .error-msg { color: var(--rust); font-size: 12px; margin-top: 6px; display: none; }
+  .error-msg.show { display: block; }
+
+  #loading-screen {
+    position: fixed; inset: 0; background: var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px; z-index: 999;
+  }
+  .loading-brand { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--gold); }
+  .loading-sub { font-size: 14px; color: var(--muted); }
+  .loading-spinner {
+    width: 28px; height: 28px;
+    border: 2.5px solid var(--border); border-top-color: var(--gold);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #not-found { display: none; text-align: center; padding: 60px 24px; }
+  #not-found h2 { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 12px; color: var(--ink); }
+  #not-found p { color: var(--muted); font-size: 15px; line-height: 1.6; }
+
+  /* Stats card */
+  .stats-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .stat-item { text-align: center; padding: 4px 8px; }
+  .stat-item:first-child { border-right: 1.5px solid var(--border); }
+  .stat-val {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .stat-lbl {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .stat-divider { display: none; }
+
+  /* Dropdowns */
+  .select-group { margin-bottom: 20px; }
+  .select-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  select {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a8278' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+    transition: border-color 0.18s;
+  }
+  select:focus { border-color: var(--gold); }
+
+  /* Dropdowns */
+  .select-group { margin-bottom: 20px; }
+  .select-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  select {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a8278' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+    transition: border-color 0.18s;
+  }
+  select:focus { border-color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <div class="loading-brand">Fortepiano</div>
+  <div class="loading-sub">Loading your students…</div>
+  <div class="loading-spinner"></div>
+</div>
+
+<div id="not-found">
+  <h2>Teacher not found</h2>
+  <p>This link doesn't match any teacher in the system.<br>Please contact Fortepiano admin.</p>
+</div>
+
+<div id="app" style="display:none; flex-direction:column; min-height:100vh;">
+  <div class="header">
+    <div class="header-brand">Fortepiano</div>
+    <div class="header-teacher">Teaching as <span id="teacher-display-name">—</span></div>
+  </div>
+
+  <div class="main">
+    <div class="date-strip">
+      <span class="date-icon">📅</span>
+      <div class="date-text">Today is <strong id="today-date">—</strong></div>
+    </div>
+
+    <!-- Stats card -->
+    <div class="stats-card" id="stats-card" style="display:none;">
+      <div class="stat-item">
+        <div class="stat-val" id="stat-monthly-classes">—</div>
+        <div class="stat-lbl">Classes This Month</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="stat-monthly-earnings">—</div>
+        <div class="stat-lbl">Earned This Month</div>
+      </div>
+    </div>
+
+    <div class="section-label">Select Student</div>
+    <div class="student-grid" id="student-grid"></div>
+
+    <div id="log-form" style="display:none;">
+      <div class="section-label" style="margin-top:4px;">Attendance</div>
+      <div class="attendance-section">
+        <div class="attendance-row">
+          <button class="att-btn" data-status="Attended" onclick="selectAttendance(this)">
+            <span class="att-icon">✅</span>Attended
+          </button>
+          <button class="att-btn" data-status="Absent" onclick="selectAttendance(this)">
+            <span class="att-icon">❌</span>Absent
+          </button>
+          <button class="att-btn" data-status="Rescheduled" onclick="selectAttendance(this)">
+            <span class="att-icon">🔄</span>Rescheduled
+          </button>
+        </div>
+        <div class="error-msg" id="att-error">Please select attendance status</div>
+      </div>
+
+      <div class="select-group">
+        <label class="field-label">Pathway & Stage</label>
+        <div class="select-row">
+          <select id="pathway-select">
+            <option value="">Pathway</option>
+            <option value="Young Beginner">Young Beginner</option>
+            <option value="Later Beginner">Later Beginner</option>
+          </select>
+          <select id="stage-select">
+            <option value="">Stage</option>
+            <option value="Stage 1">Stage 1</option>
+            <option value="Stage 2">Stage 2</option>
+            <option value="Stage 3">Stage 3</option>
+            <option value="Stage 4">Stage 4</option>
+            <option value="Stage 5">Stage 5</option>
+            <option value="Stage LB1">Stage LB1</option>
+            <option value="Stage LB2">Stage LB2</option>
+            <option value="Stage LB3">Stage LB3</option>
+            <option value="Stage LB4">Stage LB4</option>
+            <option value="Stage LB5">Stage LB5</option>
+            <option value="Exam Prep - Initial Grade">Exam Prep - Initial Grade</option>
+            <option value="Exam Prep - Grade 1">Exam Prep - Grade 1</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="select-group">
+        <label class="field-label">Pathway & Stage</label>
+        <div class="select-row">
+          <select id="pathway-select" onchange="updateStages()">
+            <option value="">Pathway</option>
+          </select>
+          <select id="stage-select">
+            <option value="">Stage</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">What was covered today</label>
+        <textarea id="covered-note" rows="3" placeholder="e.g. Hanon Ex. 3–4, worked on dynamics in piece B, hands-together practice…"></textarea>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Homework / Practice Instructions</label>
+        <textarea id="homework-note" rows="3" placeholder="e.g. Practice bars 5–12 of piece A, 10 mins Hanon Ex. 3 daily…"></textarea>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="submitLog()">
+        Log Class & Generate Update ✦
+      </button>
+    </div>
+
+    <!-- WhatsApp section — outside log-form so it stays visible after submit -->
+    <div class="wa-section" id="wa-section">
+      <div class="wa-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        Ready to send parent update
+      </div>
+      <div class="wa-preview" id="wa-preview"></div>
+      <button class="wa-btn" onclick="openWhatsApp()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        Open WhatsApp to Send
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxITTH9_ea3QudfK1qlkqwzAVA6biwP3fQ9W2ZJJOMW_x-01_uHQFuc0RkWrLyrdWiw/exec';
+
+let currentTeacher = null;
+let selectedStudentId = null;
+let selectedStatus = null;
+let submittedToday = {};
+let waMessage = '';
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const now = new Date();
+  document.getElementById('today-date').textContent = now.toLocaleDateString('en-IN', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  const params = new URLSearchParams(window.location.search);
+  const teacherKey = (params.get('teacher') || '').toLowerCase().trim();
+
+  if (!teacherKey) {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('not-found').style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?teacher=${encodeURIComponent(teacherKey)}`);
+    const data = await res.json();
+
+    document.getElementById('loading-screen').style.display = 'none';
+
+    if (!data.success) {
+      document.getElementById('not-found').style.display = 'block';
+      return;
+    }
+
+    currentTeacher = {
+      key: teacherKey,
+      name: data.teacherName,
+      students: data.students.map((name, i) => ({ id: `s${i}`, name: name.trim() }))
+    };
+
+    document.getElementById('teacher-display-name').textContent = currentTeacher.name;
+    document.getElementById('app').style.display = 'flex';
+
+    // Populate stats card
+    if (data.monthlyClasses !== undefined) {
+      document.getElementById('stat-monthly-classes').textContent = data.monthlyClasses;
+      document.getElementById('stat-monthly-earnings').textContent = '₹' + data.monthlyEarnings.toLocaleString('en-IN');
+      document.getElementById('stats-card').style.display = 'grid';
+    }
+
+    // Populate pathway dropdown dynamically from sheet
+    if (data.stages && data.stages.length > 0) {
+      window.stagesData = data.stages;
+      const pathways = [...new Set(data.stages.map(s => s.pathway))];
+      const pathwaySelect = document.getElementById('pathway-select');
+      pathways.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        pathwaySelect.appendChild(opt);
+      });
+    }
+
+    // Block already-logged students from today
+    if (data.loggedToday && data.loggedToday.length > 0) {
+      const loggedNormalized = data.loggedToday.map(n => n.trim().toLowerCase());
+      currentTeacher.students.forEach(student => {
+        if (loggedNormalized.includes(student.name.trim().toLowerCase())) {
+          submittedToday[student.id] = 'Done';
+        }
+      });
+    }
+
+    renderStudents();
+
+  } catch(err) {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('not-found').innerHTML = `
+      <h2>Connection error</h2>
+      <p>Could not load your students.<br>Check your internet and try again.</p>
+    `;
+    document.getElementById('not-found').style.display = 'block';
+  }
+});
+
+function updateStages() {
+  const pathway = document.getElementById('pathway-select').value;
+  const stageSelect = document.getElementById('stage-select');
+  stageSelect.innerHTML = '<option value="">Stage</option>';
+  if (!pathway || !window.stagesData) return;
+  window.stagesData
+    .filter(s => s.pathway === pathway)
+    .forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.stage;
+      opt.textContent = s.stage;
+      stageSelect.appendChild(opt);
+    });
+}
+
+function renderStudents() {
+  const grid = document.getElementById('student-grid');
+  grid.innerHTML = '';
+  currentTeacher.students.forEach(student => {
+    const initials = student.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const submittedStatus = submittedToday[student.id];
+    const card = document.createElement('div');
+    card.className = 'student-card' + (submittedStatus ? ` submitted att-done-${submittedStatus.toLowerCase()}` : '');
+    card.id = `card-${student.id}`;
+    card.onclick = () => !submittedStatus && selectStudent(student.id);
+    card.innerHTML = `
+      <div class="student-avatar">${initials}</div>
+      <div class="student-info">
+        <div class="student-name">${student.name}</div>
+      </div>
+      ${submittedStatus
+        ? `<span class="submitted-badge">${submittedStatus}</span>`
+        : `<div class="student-check" id="check-${student.id}">${selectedStudentId === student.id ? '✓' : ''}</div>`
+      }
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function selectStudent(studentId) {
+  selectedStudentId = studentId;
+  selectedStatus = null;
+  document.getElementById('covered-note').value = '';
+  document.getElementById('homework-note').value = '';
+  document.getElementById('pathway-select').value = '';
+  document.getElementById('stage-select').value = '';
+  document.getElementById('pathway-select').value = '';
+  document.getElementById('stage-select').value = '';
+  document.getElementById('wa-section').classList.remove('show');
+
+  document.querySelectorAll('.student-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById(`card-${studentId}`).classList.add('selected');
+  document.querySelectorAll('[id^="check-"]').forEach(el => el.textContent = '');
+  const checkEl = document.getElementById(`check-${studentId}`);
+  if (checkEl) checkEl.textContent = '✓';
+
+  document.querySelectorAll('.att-btn').forEach(b => b.className = 'att-btn');
+  document.getElementById('att-error').classList.remove('show');
+
+  document.getElementById('log-form').style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('log-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+function selectAttendance(btn) {
+  document.querySelectorAll('.att-btn').forEach(b => b.className = 'att-btn');
+  selectedStatus = btn.dataset.status;
+  btn.classList.add(`selected-${selectedStatus.toLowerCase()}`);
+  document.getElementById('att-error').classList.remove('show');
+}
+
+async function submitLog() {
+  if (!selectedStudentId) return;
+  if (!selectedStatus) {
+    document.getElementById('att-error').classList.add('show');
+    return;
+  }
+
+  const student = currentTeacher.students.find(s => s.id === selectedStudentId);
+  const covered = document.getElementById('covered-note').value.trim();
+  const homework = document.getElementById('homework-note').value.trim();
+  const pathway = document.getElementById('pathway-select').value;
+  const stage = document.getElementById('stage-select').value;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  const payload = {
+    teacher: currentTeacher.name,
+    teacherKey: currentTeacher.key,
+    student: student.name,
+    date: dateStr,
+    time: timeStr,
+    status: selectedStatus,
+    covered: covered,
+    homework: homework,
+    pathway: pathway,
+    stage: stage
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) { /* no-cors — silent */ }
+
+  // Store submitted status before resetting
+  const submittedStudentName = student.name;
+  const submittedStatus2 = selectedStatus;
+  submittedToday[selectedStudentId] = selectedStatus;
+
+  // Build WhatsApp message
+  const divider = '━━━━━━━━━━━━━━━';
+
+  const formatBullets = (text) => {
+    if (!text) return '';
+    return text.split('\n').filter(l => l.trim()).map(l => '• ' + l.trim()).join('\n');
+  };
+
+  let msg = 'Hi,\n\n';
+  msg += 'Here\'s an update of ' + student.name + '\'s session on ' + dateStr + ' 🎹\n';
+  if (pathway && stage) msg += '📌 ' + pathway + ' — ' + stage + '\n';
+  if (covered) {
+    msg += '\n' + divider + '\n';
+    msg += '📖 *What We Covered*\n';
+    msg += divider + '\n';
+    msg += formatBullets(covered) + '\n';
+  }
+  if (homework) {
+    msg += '\n' + divider + '\n';
+    msg += '🏠 *Practice This Week*\n';
+    msg += divider + '\n';
+    msg += formatBullets(homework) + '\n';
+  }
+  msg += '\nRegards,\n' + currentTeacher.name;
+  waMessage = msg;
+
+  document.getElementById('wa-preview').textContent = msg;
+  document.getElementById('wa-section').classList.add('show');
+
+  btn.disabled = false;
+  btn.textContent = 'Log Class & Generate Update ✦';
+  document.getElementById('log-form').style.display = 'none';
+  selectedStudentId = null;
+  selectedStatus = null;
+
+  renderStudents();
+  showToast(`✓ ${submittedStudentName} logged as ${submittedStatus2.toLowerCase()}`);
+  document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function openWhatsApp() {
+  window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
