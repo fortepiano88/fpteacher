@@ -10,7 +10,7 @@
     --ink: #1a1410;
     --paper: #faf7f2;
     --cream: #f2ede4;
-    --gold: #FFFFFF;
+    --gold: #c9933a;
     --gold-light: #e8b86d;
     --rust: #c25c3a;
     --sage: #5a7a5c;
@@ -563,7 +563,7 @@ async function submitLog() {
 
   let msg = 'Hi,\n';
   msg += 'Here\'s an update of ' + student.name + '\'s session on ' + dateStr + ' 🎹\n';
-  if (stageDisplay) msg += '\n 📌Current Stage: ' + stageDisplay + '\n';
+  if (stageDisplay) msg += '\n📌 ' + stageDisplay + '\n';
   if (covered) {
     msg += divider + '\n';
     msg += '📖 *What We Covered*\n';
@@ -575,7 +575,6 @@ async function submitLog() {
     msg += '🏠 *Practice This Week*\n';
     msg += divider + '\n';
     msg += formatBullets(homework) + '\n';
-    msg += divider + '\n';
   }
   msg += 'Regards,\n' + currentTeacher.name;
   waMessage = msg;
