@@ -726,6 +726,36 @@ async function submitPause() {
         day: 'numeric', month: 'short', year: 'numeric'
       });
       pauseUsedStudents[student.name] = true;
+      // Format dates nicely
+const startDateObj = new Date(startVal);
+const endDateObj = new Date(endVal);
+
+const startFormatted = startDateObj.toLocaleDateString('en-IN', {
+  day: 'numeric', month: 'short', year: 'numeric'
+});
+const endFormatted = endDateObj.toLocaleDateString('en-IN', {
+  day: 'numeric', month: 'short', year: 'numeric'
+});
+
+// Clean WhatsApp message
+let msg = `*Important Update ❗️*
+
+Hello,
+
+${student.name}'s piano classes are paused from *${startFormatted} to ${endFormatted}*.
+
+Please note that no more pauses are available this year.`;
+
+waMessage = msg;
+
+// Show preview
+document.getElementById('wa-preview').textContent = msg;
+document.getElementById('wa-section').classList.add('show');
+
+// Scroll into view
+setTimeout(() => {
+  document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}, 100);
       closePauseModal();
       renderStudents();
       document.getElementById('log-form').style.display = 'none';
