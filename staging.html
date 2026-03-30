@@ -710,28 +710,22 @@ async function submitPause() {
   confirmBtn.textContent = 'Saving…';
 
   try {
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'pause',
-        student: student.name,
-        teacher: currentTeacher.name,
-        pauseStart: startVal,
-        pauseEnd: endVal
-      })
+    const params = new URLSearchParams({
+      action: 'pause',
+      student: student.name,
+      teacher: currentTeacher.name,
+      pauseStart: startVal,
+      pauseEnd: endVal
     });
+    const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
     const result = await res.json();
 
     if (result.success) {
-      // Update local state
       const endDate = new Date(endVal);
       pausedStudents[student.name] = endDate.toLocaleDateString('en-IN', {
         day: 'numeric', month: 'short', year: 'numeric'
       });
       pauseUsedStudents[student.name] = true;
-
       closePauseModal();
       renderStudents();
       document.getElementById('log-form').style.display = 'none';
@@ -784,24 +778,33 @@ async function submitLog() {
     stage: stage
   };
 
-  let footerData = null;
-
+  // Fire and forget — no-cors, can't read response
   try {
-    const res = await fetch(APPS_SCRIPT_URL, {
+    await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      mode: 'cors',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const result = await res.json();
-    if (result.showFooter) {
-      footerData = {
-        remaining: result.remainingClasses,
-        rescheduled: result.rescheduledCount
-      };
-    }
-  } catch(e) {
-    // Continue without footer if fetch fails
+  } catch(e) { /* silent */ }
+
+  // If Attended, fetch footer stats via separate GET
+  let footerData = null;
+  if (selectedStatus === 'Attended') {
+    try {
+      const params = new URLSearchParams({
+        action: 'termstats',
+        student: student.name
+      });
+      const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+      const result = await res.json();
+      if (result.success) {
+        footerData = {
+          remaining: result.remainingClasses,
+          rescheduled: result.rescheduledCount
+        };
+      }
+    } catch(e) { /* no footer */ }
   }
 
   const submittedStudentName = student.name;
@@ -852,7 +855,6 @@ async function submitLog() {
   showToast(`✓ ${submittedStudentName} logged as ${submittedStatus2.toLowerCase()}`);
   document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
-
 function openWhatsApp() {
   window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
 }
