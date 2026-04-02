@@ -808,35 +808,24 @@ async function submitLog() {
     stage: stage
   };
 
-  // Fire and forget — no-cors, can't read response
-  try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-  } catch(e) { /* silent */ }
+  // Fire and forget — do NOT await this
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).catch(() => {});
 
-  // If Attended, fetch footer stats via separate GET
-  let footerData = null;
+  // Kick off termstats in parallel (don't await yet)
+  let termStatsPromise = null;
   if (selectedStatus === 'Attended') {
-    try {
-      const params = new URLSearchParams({
-        action: 'termstats',
-        student: student.name
-      });
-      const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
-      const result = await res.json();
-      if (result.success) {
-        footerData = {
-          remaining: result.remainingClasses,
-          rescheduled: result.rescheduledCount
-        };
-      }
-    } catch(e) { /* no footer */ }
+    const params = new URLSearchParams({ action: 'termstats', student: student.name });
+    termStatsPromise = fetch(`${APPS_SCRIPT_URL}?${params.toString()}`)
+      .then(r => r.json())
+      .catch(() => null);
   }
 
+  // Update UI immediately — zero wait
   const submittedStudentName = student.name;
   const submittedStatus2 = selectedStatus;
   submittedToday[selectedStudentId] = selectedStatus;
@@ -865,13 +854,8 @@ async function submitLog() {
     msg += formatBullets(homework) + '\n';
     msg += divider + '\n';
   }
-  if (footerData) {
-    msg += '\nRemaining Classes: ' + footerData.remaining + '\n';
-    msg += 'Rescheduled: ' + footerData.rescheduled + '/3\n';
-  }
-  msg += '\nRegards,\n' + currentTeacher.name;
-  waMessage = msg;
 
+  waMessage = msg;
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
 
@@ -884,6 +868,20 @@ async function submitLog() {
   renderStudents();
   showToast(`✓ ${submittedStudentName} logged as ${submittedStatus2.toLowerCase()}`);
   document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Silently update the WhatsApp preview with term stats once they arrive
+  if (termStatsPromise) {
+    termStatsPromise.then(result => {
+      if (result && result.success) {
+        const updatedMsg = msg +
+          '\nRemaining Classes: ' + result.remainingClasses + '\n' +
+          'Rescheduled: ' + result.rescheduledCount + '/3\n';
+        waMessage = updatedMsg;
+        document.getElementById('wa-preview').textContent = updatedMsg;
+      }
+    });
+  }
+}
 }
 function openWhatsApp() {
   window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
