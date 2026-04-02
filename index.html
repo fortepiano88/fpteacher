@@ -816,6 +816,8 @@ async function submitLog() {
       body: JSON.stringify(payload)
     });
   } catch(e) { /* silent */ }
+ 
+  await new Promise(resolve => setTimeout(resolve, 3000));
 
   // If Attended, fetch footer stats via separate GET
   let footerData = null;
