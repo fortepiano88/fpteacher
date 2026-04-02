@@ -712,7 +712,7 @@ async function submitPause() {
     const params = new URLSearchParams({
       action: 'pause',
       student: student.name,
-      teacher: currentTeacher.name,
+      teacher: currentTeacher.key,
       pauseStart: startVal,
       pauseEnd: endVal
     });
