@@ -836,7 +836,6 @@ async function submitLog() {
   } catch(e) { /* silent */ }
   
 if (selectedStatus === 'Rescheduled') {
-    submittedToday[selectedStudentId] = selectedStatus;
     btn.disabled = false;
     btn.textContent = 'Log Class & Generate Update ✦';
     document.getElementById('log-form').style.display = 'none';
