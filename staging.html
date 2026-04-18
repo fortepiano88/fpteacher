@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fortepiano — Teacher App (Staging)</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
   :root {
     --ink: #1a1410;
@@ -837,6 +838,24 @@ async function submitLog() {
 
   // If Attended, fetch footer stats via separate GET
   let footerData = null;
+  const submittedStudentName = student.name;
+  const submittedStatus2 = selectedStatus;
+
+  // If Rescheduled — log only, no WA panel, no termstats fetch
+  if (selectedStatus === 'Rescheduled') {
+    submittedToday[selectedStudentId] = selectedStatus;
+    btn.disabled = false;
+    btn.textContent = 'Log Class & Generate Update ✦';
+    document.getElementById('log-form').style.display = 'none';
+    document.getElementById('wa-section').classList.remove('show');
+    selectedStudentId = null;
+    selectedStatus = null;
+    renderStudents();
+    showToast(`✓ ${submittedStudentName} logged as rescheduled`);
+    return;
+  }
+
+  // If Attended, fetch footer stats via separate GET
   if (selectedStatus === 'Attended') {
     try {
       const params = new URLSearchParams({
@@ -856,7 +875,9 @@ async function submitLog() {
 
   const submittedStudentName = student.name;
   const submittedStatus2 = selectedStatus;
+  if (selectedStatus === 'Attended' || selectedStatus === 'Absent') {
   submittedToday[selectedStudentId] = selectedStatus;
+}
 
   const divider = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
