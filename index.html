@@ -834,7 +834,19 @@ async function submitLog() {
       body: JSON.stringify(payload)
     });
   } catch(e) { /* silent */ }
-
+  
+if (selectedStatus === 'Rescheduled') {
+    submittedToday[selectedStudentId] = selectedStatus;
+    btn.disabled = false;
+    btn.textContent = 'Log Class & Generate Update ✦';
+    document.getElementById('log-form').style.display = 'none';
+    document.getElementById('wa-section').classList.remove('show');
+    selectedStudentId = null;
+    selectedStatus = null;
+    renderStudents();
+    showToast(`✓ ${submittedStudentName} logged as rescheduled`);
+    return;
+  }
   // If Attended, fetch footer stats via separate GET
   let footerData = null;
   if (selectedStatus === 'Attended') {
