@@ -856,7 +856,9 @@ async function submitLog() {
 
   const submittedStudentName = student.name;
   const submittedStatus2 = selectedStatus;
+  if (selectedStatus === 'Attended' || selectedStatus === 'Absent') {
   submittedToday[selectedStudentId] = selectedStatus;
+}
 
   const divider = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
