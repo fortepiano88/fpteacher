@@ -837,6 +837,24 @@ async function submitLog() {
 
   // If Attended, fetch footer stats via separate GET
   let footerData = null;
+  const submittedStudentName = student.name;
+  const submittedStatus2 = selectedStatus;
+
+  // If Rescheduled — log only, no WA panel, no termstats fetch
+  if (selectedStatus === 'Rescheduled') {
+    submittedToday[selectedStudentId] = selectedStatus;
+    btn.disabled = false;
+    btn.textContent = 'Log Class & Generate Update ✦';
+    document.getElementById('log-form').style.display = 'none';
+    document.getElementById('wa-section').classList.remove('show');
+    selectedStudentId = null;
+    selectedStatus = null;
+    renderStudents();
+    showToast(`✓ ${submittedStudentName} logged as rescheduled`);
+    return;
+  }
+
+  // If Attended, fetch footer stats via separate GET
   if (selectedStatus === 'Attended') {
     try {
       const params = new URLSearchParams({
