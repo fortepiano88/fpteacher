@@ -678,6 +678,7 @@ function renderStudents() {
         ? `<button class="pause-btn" onclick="openPauseModal(event, '${student.id}')">Pause</button>`
         : '';
       rightSlot = `
+        <button class="reschedule-btn" onclick="openRescheduleFromCard(event, '${student.id}')">Reschedule</button>
         ${pauseBtn}
         <div class="student-check" id="check-${student.id}">${selectedStudentId === student.id ? '✓' : ''}</div>
       `;
@@ -724,6 +725,16 @@ function selectAttendance(btn) {
   selectedStatus = btn.dataset.status;
   btn.classList.add(`selected-${selectedStatus.toLowerCase()}`);
   document.getElementById('att-error').classList.remove('show');
+}
+
+function openRescheduleFromCard(event, studentId) {
+  event.stopPropagation();
+  selectStudent(studentId);
+  // Pre-select Rescheduled
+  setTimeout(() => {
+    const rescheduleBtn = document.querySelector('.att-btn[data-status="Rescheduled"]');
+    if (rescheduleBtn) selectAttendance(rescheduleBtn);
+  }, 150);
 }
 
 // --- Pending Makeups ---
