@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fortepiano — Teacher App (Staging)</title>
-<link href="https://script.google.com/macros/s/AKfycbweX7KPBX2760Tw7OZFnOJneXbOFBh6uc1u6j_-6UvR2VFew5EIdl-GuDHLJDHfL345Pg/exec">
-<style> 
-:root {
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
     --ink: #1a1410;
     --paper: #faf7f2;
     --cream: #f2ede4;
@@ -19,9 +19,9 @@
     --white: #ffffff;
     --shadow: 0 2px 16px rgba(26,20,16,0.10);
   }
- 
+
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
- 
+
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--paper);
@@ -30,7 +30,7 @@
     display: flex;
     flex-direction: column;
   }
- 
+
   .header {
     background: var(--ink);
     color: var(--paper);
@@ -45,7 +45,7 @@
   .header-brand { font-family: 'DM Serif Display', serif; font-size: 22px; letter-spacing: 0.02em; color: var(--gold-light); }
   .header-teacher { font-size: 13px; color: var(--muted); font-weight: 400; }
   .header-teacher span { color: var(--paper); font-weight: 500; }
- 
+
   .staging-banner {
     background: #c25c3a;
     color: white;
@@ -56,9 +56,9 @@
     text-transform: uppercase;
     padding: 6px;
   }
- 
+
   .main { flex: 1; padding: 20px 16px 40px; max-width: 480px; margin: 0 auto; width: 100%; }
- 
+
   .date-strip {
     background: var(--cream);
     border: 1px solid var(--border);
@@ -72,7 +72,7 @@
   .date-icon { font-size: 18px; }
   .date-text { font-size: 14px; color: var(--muted); }
   .date-text strong { color: var(--ink); font-weight: 600; }
- 
+
   .section-label {
     font-size: 11px;
     font-weight: 600;
@@ -82,9 +82,9 @@
     margin-bottom: 10px;
     padding-left: 2px;
   }
- 
+
   .student-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
- 
+
   .student-card {
     background: var(--white);
     border: 1.5px solid var(--border);
@@ -100,7 +100,7 @@
   .student-card.selected { border-color: var(--gold-light); background: #fffbf4; box-shadow: 0 0 0 3px rgba(201,147,58,0.12); }
   .student-card.submitted { opacity: 0.55; pointer-events: none; }
   .student-card.on-pause { opacity: 0.6; pointer-events: none; background: #faf7f2; }
- 
+
   .student-avatar {
     width: 40px; height: 40px;
     border-radius: 50%;
@@ -113,7 +113,7 @@
   .student-info { flex: 1; min-width: 0; }
   .student-name { font-weight: 500; font-size: 15px; color: var(--ink); }
   .student-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
- 
+
   .student-check {
     width: 22px; height: 22px;
     border-radius: 50%;
@@ -122,7 +122,7 @@
     transition: all 0.18s; flex-shrink: 0; font-size: 12px;
   }
   .student-card.selected .student-check { background: var(--gold-light); border-color: var(--gold-light); color: white; }
- 
+
   .submitted-badge {
     font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
     text-transform: uppercase; padding: 3px 8px; border-radius: 100px;
@@ -136,7 +136,7 @@
     text-transform: uppercase; padding: 3px 8px; border-radius: 100px;
     background: #f0f4ff; color: #4a6fa5; flex-shrink: 0;
   }
- 
+
   .pause-btn {
     font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
     text-transform: uppercase; padding: 4px 10px; border-radius: 100px;
@@ -146,7 +146,7 @@
     transition: all 0.18s;
   }
   .pause-btn:hover { border-color: var(--rust); color: var(--rust); }
- 
+
   .attendance-section { margin-bottom: 24px; }
   .attendance-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
   .att-btn {
@@ -161,7 +161,7 @@
   .att-btn.selected-attended { background: #f0faf0; border-color: var(--sage); color: var(--sage); }
   .att-btn.selected-absent { background: #fdf4f2; border-color: var(--rust); color: var(--rust); }
   .att-btn.selected-rescheduled { background: #fdf8ef; border-color: #b8860b; color: #b8860b; }
- 
+
   .field-group { margin-bottom: 20px; }
   .field-label {
     font-size: 11px; font-weight: 600; letter-spacing: 0.10em;
@@ -175,7 +175,7 @@
   }
   textarea:focus { border-color: var(--gold-light); }
   textarea::placeholder { color: #bfb8ae; }
- 
+
   input[type="date"] {
     width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
     padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
@@ -183,7 +183,7 @@
     transition: border-color 0.18s;
   }
   input[type="date"]:focus { border-color: var(--gold-light); }
- 
+
   .submit-btn {
     width: 100%; background: var(--ink); color: var(--paper); border: none;
     border-radius: 14px; padding: 16px; font-family: 'DM Sans', sans-serif;
@@ -193,7 +193,7 @@
   .submit-btn:hover { background: #2d2520; transform: translateY(-1px); box-shadow: var(--shadow); }
   .submit-btn:active { transform: translateY(0); }
   .submit-btn:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
- 
+
   .wa-section {
     display: none; background: var(--white); border: 1.5px solid #25D366;
     border-radius: 16px; padding: 20px; margin-top: 20px;
@@ -201,7 +201,7 @@
   }
   .wa-section.show { display: block; }
   @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
- 
+
   .wa-title { font-size: 13px; font-weight: 600; color: #1a8a3a; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
   .wa-preview {
     background: #f0fdf4; border-radius: 10px; padding: 12px;
@@ -216,7 +216,7 @@
     transition: all 0.2s;
   }
   .wa-btn:hover { background: #1da851; }
- 
+
   .wa-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .copy-btn {
     border: 1.5px solid var(--border); border-radius: 12px; padding: 14px;
@@ -227,7 +227,7 @@
   }
   .copy-btn:hover { border-color: var(--ink); background: var(--cream); }
   .copy-btn.copied { border-color: var(--sage); color: var(--sage); background: #f0faf0; }
- 
+
   /* Modal */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
@@ -269,7 +269,7 @@
   }
   .modal-confirm:hover { background: #2d2520; }
   .modal-confirm:disabled { background: var(--muted); cursor: not-allowed; }
- 
+
   .toast {
     position: fixed; bottom: 24px; left: 50%;
     transform: translateX(-50%) translateY(80px);
@@ -279,10 +279,10 @@
     z-index: 999; white-space: nowrap;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
- 
+
   .error-msg { color: var(--rust); font-size: 12px; margin-top: 6px; display: none; }
   .error-msg.show { display: block; }
- 
+
   #loading-screen {
     position: fixed; inset: 0; background: var(--paper);
     display: flex; align-items: center; justify-content: center;
@@ -296,11 +296,11 @@
     border-radius: 50%; animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
- 
+
   #not-found { display: none; text-align: center; padding: 60px 24px; }
   #not-found h2 { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 12px; color: var(--ink); }
   #not-found p { color: var(--muted); font-size: 15px; line-height: 1.6; }
- 
+
   .stats-card {
     background: var(--white); border: 1.5px solid var(--border);
     border-radius: 16px; padding: 18px 20px; margin-bottom: 20px;
@@ -310,7 +310,7 @@
   .stat-item:first-child { border-right: 1.5px solid var(--border); }
   .stat-val { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--ink); line-height: 1; }
   .stat-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
- 
+
   .select-group { margin-bottom: 20px; }
   select {
     width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
@@ -322,7 +322,7 @@
     cursor: pointer; transition: border-color 0.18s;
   }
   select:focus { border-color: var(--gold-light); }
- 
+
   /* Pending Makeups Section */
   .makeups-section {
     background: #fffbf4; border: 1.5px solid #e8b86d;
@@ -353,7 +353,7 @@
   .makeup-days.warning { background: #fdf8ef; color: #a07000; }
   .makeup-days.ok { background: #f0faf0; color: var(--sage); }
   .makeup-days.expired { background: #f5f5f5; color: var(--muted); }
- 
+
   /* Reschedule button on student card */
   .reschedule-btn {
     font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
@@ -363,7 +363,7 @@
     font-family: 'DM Sans', sans-serif; transition: all 0.18s;
   }
   .reschedule-btn:hover { border-color: var(--gold-light); color: #a07830; }
- 
+
   input[type="time"] {
     width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
     padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
@@ -371,7 +371,7 @@
     transition: border-color 0.18s;
   }
   input[type="time"]:focus { border-color: var(--gold-light); }
- 
+
   /* Makeup form banner */
   .makeup-banner {
     background: #fffbf4; border: 1.5px solid #e8b86d;
@@ -379,20 +379,21 @@
     font-size: 13px; color: #a07830; font-weight: 500;
     display: flex; align-items: center; gap: 8px;
   }
+</style>
 </head>
 <body>
- <div class="staging-banner">Staging Environment</div>
+<div class="staging-banner">Staging Environment</div>
 <div id="loading-screen">
   <div class="loading-brand">Fortepiano</div>
   <div class="loading-sub">Loading your students…</div>
   <div class="loading-spinner"></div>
 </div>
- 
+
 <div id="not-found">
   <h2>Teacher not found</h2>
   <p>This link doesn't match any teacher in the system.<br>Please contact Fortepiano admin.</p>
 </div>
- 
+
 <!-- Makeup / Reschedule Modal -->
 <div class="modal-overlay" id="makeup-modal">
   <div class="modal">
@@ -421,7 +422,7 @@
     </div>
   </div>
 </div>
- 
+
 <!-- Pause Modal -->
 <div class="modal-overlay" id="pause-modal">
   <div class="modal">
@@ -442,19 +443,19 @@
     </div>
   </div>
 </div>
- 
+
 <div id="app" style="display:none; flex-direction:column; min-height:100vh;">
   <div class="header">
     <div class="header-brand">Fortepiano</div>
     <div class="header-teacher">Teaching as <span id="teacher-display-name">—</span></div>
   </div>
- 
+
   <div class="main">
     <div class="date-strip">
       <span class="date-icon">📅</span>
       <div class="date-text">Today is <strong id="today-date">—</strong></div>
     </div>
- 
+
     <div class="stats-card" id="stats-card" style="display:none;">
       <div class="stat-item">
         <div class="stat-val" id="stat-monthly-classes">—</div>
@@ -465,17 +466,17 @@
         <div class="stat-lbl">Earned This Month</div>
       </div>
     </div>
- 
+
     <div id="pending-makeups-section" style="display:none;">
       <div class="makeups-section">
         <div class="makeups-header">🔄 Pending Makeups</div>
         <div id="pending-makeups-list"></div>
       </div>
     </div>
- 
+
     <div class="section-label">Select Student</div>
     <div class="student-grid" id="student-grid"></div>
- 
+
     <div id="log-form" style="display:none;">
       <div class="section-label" style="margin-top:4px;">Attendance</div>
       <div class="attendance-section">
@@ -492,32 +493,32 @@
         </div>
         <div class="error-msg" id="att-error">Please select attendance status</div>
       </div>
- 
+
       <div class="select-group">
         <label class="field-label">Stage</label>
         <select id="stage-select">
           <option value="">Select Stage</option>
         </select>
       </div>
- 
+
       <div class="field-group">
         <label class="field-label">What was covered today</label>
         <textarea id="covered-note" rows="3" placeholder="e.g. Hanon Ex. 3–4, worked on dynamics in piece B, hands-together practice…"></textarea>
       </div>
- 
+
       <div class="field-group">
         <label class="field-label">Homework / Practice Instructions</label>
         <textarea id="homework-note" rows="3" placeholder="e.g. Practice bars 5–12 of piece A, 10 mins Hanon Ex. 3 daily…"></textarea>
       </div>
- 
+
       <button class="submit-btn" id="submit-btn" onclick="submitLog()">
         Log Class & Generate Update ✦
       </button>
     </div>
- 
+
     <div class="wa-section" id="wa-section">
       <div class="wa-title">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        💬
         Ready to send parent update
       </div>
       <div class="wa-preview" id="wa-preview"></div>
@@ -527,20 +528,20 @@
           Copy Message
         </button>
         <button class="wa-btn" onclick="openWhatsApp()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          💬
           WhatsApp
         </button>
       </div>
     </div>
- 
+
   </div>
 </div>
- 
+
 <div class="toast" id="toast"></div>
- 
+
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxITTH9_ea3QudfK1qlkqwzAVA6biwP3fQ9W2ZJJOMW_x-01_uHQFuc0RkWrLyrdWiw/exec';
- 
+
 let currentTeacher = null;
 let selectedStudentId = null;
 let selectedStatus = null;
@@ -552,52 +553,52 @@ let allPendingMakeups = [];     // full list for the section
 let pauseTargetStudentId = null;
 let makeupTarget = null;        // { student, originalDate, flag, daysLeft }
 let waMessage = '';
- 
+
 window.addEventListener('DOMContentLoaded', async () => {
   const now = new Date();
   document.getElementById('today-date').textContent = now.toLocaleDateString('en-IN', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
- 
+
   const params = new URLSearchParams(window.location.search);
   const teacherKey = (params.get('teacher') || '').toLowerCase().trim();
- 
+
   if (!teacherKey) {
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('not-found').style.display = 'block';
     return;
   }
- 
+
   try {
     const res = await fetch(`${APPS_SCRIPT_URL}?teacher=${encodeURIComponent(teacherKey)}`);
     const data = await res.json();
- 
+
     document.getElementById('loading-screen').style.display = 'none';
- 
+
     if (!data.success) {
       document.getElementById('not-found').style.display = 'block';
       return;
     }
- 
+
     currentTeacher = {
       key: teacherKey,
       name: data.teacherName,
       students: data.students.map((name, i) => ({ id: `s${i}`, name: name.trim() }))
     };
- 
+
     pausedStudents = data.pausedStudents || {};
     pauseUsedStudents = data.pauseUsedStudents || {};
     pendingReschedulesMap = data.pendingReschedules || {};
- 
+
     document.getElementById('teacher-display-name').textContent = currentTeacher.name;
     document.getElementById('app').style.display = 'flex';
- 
+
     if (data.monthlyClasses !== undefined) {
       document.getElementById('stat-monthly-classes').textContent = data.monthlyClasses;
       document.getElementById('stat-monthly-earnings').textContent = '₹' + data.monthlyEarnings.toLocaleString('en-IN');
       document.getElementById('stats-card').style.display = 'grid';
     }
- 
+
     if (data.stages && data.stages.length > 0) {
       const stageSelect = document.getElementById('stage-select');
       const makeupStageSelect = document.getElementById('makeup-stage-select');
@@ -610,7 +611,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         makeupStageSelect.appendChild(opt2);
       });
     }
- 
+
     if (data.loggedToday && data.loggedToday.length > 0) {
       const loggedNormalized = data.loggedToday.map(n => n.trim().toLowerCase());
       currentTeacher.students.forEach(student => {
@@ -619,12 +620,12 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
       });
     }
- 
+
     renderStudents();
- 
+
     // Load pending makeups
     loadPendingMakeups();
- 
+
   } catch(err) {
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('not-found').innerHTML = `
@@ -634,20 +635,20 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('not-found').style.display = 'block';
   }
 });
- 
+
 function renderStudents() {
   const grid = document.getElementById('student-grid');
   grid.innerHTML = '';
- 
+
   currentTeacher.students.forEach(student => {
     const initials = student.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const submittedStatus = submittedToday[student.id];
     const isPaused = pausedStudents[student.name];
     const pauseUsed = pauseUsedStudents[student.name];
     const pendingCount = pendingReschedulesMap[student.name] || 0;
- 
+
     const card = document.createElement('div');
- 
+
     if (isPaused) {
       card.className = 'student-card on-pause';
     } else if (submittedStatus) {
@@ -655,18 +656,18 @@ function renderStudents() {
     } else {
       card.className = 'student-card';
     }
- 
+
     card.id = `card-${student.id}`;
- 
+
     if (!isPaused && !submittedStatus) {
       card.onclick = () => selectStudent(student.id);
     }
- 
+
     // Sub-label: pending reschedule count
     const subLabel = pendingCount > 0
       ? `<div class="student-sub">🔄 ${pendingCount} pending makeup${pendingCount > 1 ? 's' : ''}</div>`
       : '';
- 
+
     let rightSlot = '';
     if (isPaused) {
       rightSlot = `<span class="pause-badge">Paused till ${isPaused}</span>`;
@@ -681,7 +682,7 @@ function renderStudents() {
         <div class="student-check" id="check-${student.id}">${selectedStudentId === student.id ? '✓' : ''}</div>
       `;
     }
- 
+
     card.innerHTML = `
       <div class="student-avatar">${initials}</div>
       <div class="student-info">
@@ -690,11 +691,11 @@ function renderStudents() {
       </div>
       ${rightSlot}
     `;
- 
+
     grid.appendChild(card);
   });
 }
- 
+
 function selectStudent(studentId) {
   selectedStudentId = studentId;
   selectedStatus = null;
@@ -702,31 +703,31 @@ function selectStudent(studentId) {
   document.getElementById('homework-note').value = '';
   document.getElementById('stage-select').value = '';
   document.getElementById('wa-section').classList.remove('show');
- 
+
   document.querySelectorAll('.student-card').forEach(c => c.classList.remove('selected'));
   document.getElementById(`card-${studentId}`).classList.add('selected');
   document.querySelectorAll('[id^="check-"]').forEach(el => el.textContent = '');
   const checkEl = document.getElementById(`check-${studentId}`);
   if (checkEl) checkEl.textContent = '✓';
- 
+
   document.querySelectorAll('.att-btn').forEach(b => b.className = 'att-btn');
   document.getElementById('att-error').classList.remove('show');
- 
+
   document.getElementById('log-form').style.display = 'block';
   setTimeout(() => {
     document.getElementById('log-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
 }
- 
+
 function selectAttendance(btn) {
   document.querySelectorAll('.att-btn').forEach(b => b.className = 'att-btn');
   selectedStatus = btn.dataset.status;
   btn.classList.add(`selected-${selectedStatus.toLowerCase()}`);
   document.getElementById('att-error').classList.remove('show');
 }
- 
+
 // --- Pending Makeups ---
- 
+
 async function loadPendingMakeups() {
   try {
     const params = new URLSearchParams({
@@ -741,26 +742,26 @@ async function loadPendingMakeups() {
     }
   } catch(e) { /* silent */ }
 }
- 
+
 function renderPendingMakeups() {
   const section = document.getElementById('pending-makeups-section');
   const list = document.getElementById('pending-makeups-list');
   list.innerHTML = '';
- 
+
   const active = allPendingMakeups.filter(m => (m.daysLeft === undefined || m.daysLeft > 0));
- 
+
   if (active.length === 0) {
     section.style.display = 'none';
     return;
   }
- 
+
   section.style.display = 'block';
- 
+
   active.forEach(m => {
     const isConfirmed = !!m.proposedDate;
     const flag = m.flag || '⏳';
     const daysLeft = m.daysLeft !== undefined ? m.daysLeft : null;
- 
+
     let daysClass = 'ok';
     let daysLabel = daysLeft !== null ? `${daysLeft}d left` : 'Confirmed';
     if (daysLeft !== null) {
@@ -768,12 +769,12 @@ function renderPendingMakeups() {
       else if (daysLeft <= 7) daysClass = 'urgent';
       else if (daysLeft <= 17) daysClass = 'warning';
     }
- 
+
     const originalDateFormatted = formatDateDisplay(m.originalDate);
     const metaText = isConfirmed
       ? `Makeup: ${formatDateDisplay(m.proposedDate)}${m.proposedTime ? ' at ' + m.proposedTime : ''}`
       : `Rescheduled from ${originalDateFormatted}`;
- 
+
     const card = document.createElement('div');
     card.className = 'makeup-card';
     card.innerHTML = `
@@ -788,13 +789,13 @@ function renderPendingMakeups() {
     list.appendChild(card);
   });
 }
- 
+
 function formatDateDisplay(dateVal) {
   if (!dateVal) return '—';
   const d = new Date(dateVal);
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 }
- 
+
 function openMakeupModal(makeup) {
   makeupTarget = makeup;
   const isConfirmed = !!makeup.proposedDate;
@@ -808,26 +809,26 @@ function openMakeupModal(makeup) {
   document.getElementById('makeup-confirm-btn').textContent = 'Log Makeup ✦';
   document.getElementById('makeup-modal').classList.add('show');
 }
- 
+
 function closeMakeupModal() {
   document.getElementById('makeup-modal').classList.remove('show');
   makeupTarget = null;
 }
- 
+
 async function submitMakeupLog() {
   if (!makeupTarget) return;
- 
+
   const covered = document.getElementById('makeup-covered').value.trim();
   const homework = document.getElementById('makeup-homework').value.trim();
   const stage = document.getElementById('makeup-stage-select').value;
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
- 
+
   const confirmBtn = document.getElementById('makeup-confirm-btn');
   confirmBtn.disabled = true;
   confirmBtn.textContent = 'Submitting…';
- 
+
   const payload = {
     teacher: currentTeacher.name,
     teacherKey: currentTeacher.key,
@@ -841,7 +842,7 @@ async function submitMakeupLog() {
     isMakeup: true,
     originalRescheduleDate: makeupTarget.originalDate ? makeupTarget.originalDate.toString() : ''
   };
- 
+
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
@@ -850,7 +851,7 @@ async function submitMakeupLog() {
       body: JSON.stringify(payload)
     });
   } catch(e) { /* silent */ }
- 
+
   // Remove from local pending list
   allPendingMakeups = allPendingMakeups.filter(m =>
     !(m.student === makeupTarget.student && m.originalDate === makeupTarget.originalDate)
@@ -859,7 +860,7 @@ async function submitMakeupLog() {
     pendingReschedulesMap[makeupTarget.student] = Math.max(0, pendingReschedulesMap[makeupTarget.student] - 1);
     if (pendingReschedulesMap[makeupTarget.student] === 0) delete pendingReschedulesMap[makeupTarget.student];
   }
- 
+
   // Build WA message
   const divider = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
@@ -874,56 +875,56 @@ async function submitMakeupLog() {
   }
   msg += `\nRegards,\n${currentTeacher.name}`;
   waMessage = msg;
- 
+
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
- 
+
   closeMakeupModal();
   renderStudents();
   renderPendingMakeups();
   showToast(`✓ Makeup class logged for ${makeupTarget.student}`);
   makeupTarget = null;
- 
+
   setTimeout(() => {
     document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 100);
 }
- 
+
 // --- Pause Modal ---
- 
+
 function openPauseModal(event, studentId) {
   event.stopPropagation();
   pauseTargetStudentId = studentId;
- 
+
   const student = currentTeacher.students.find(s => s.id === studentId);
   document.getElementById('pause-modal-sub').textContent =
     `Set the pause window for ${student.name}. Maximum 31 days. This can only be used once per year.`;
- 
+
   // Default start date to today
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
   document.getElementById('pause-start').value = todayStr;
   document.getElementById('pause-start').min = todayStr;
- 
+
   // Default end date to today + 7
   const defaultEnd = new Date(today);
   defaultEnd.setDate(defaultEnd.getDate() + 7);
   document.getElementById('pause-end').value = defaultEnd.toISOString().split('T')[0];
- 
+
   // Set max end date = start + 31
   updateEndDateMax();
- 
+
   document.getElementById('pause-error').classList.remove('show');
   document.getElementById('pause-error').textContent = '';
   document.getElementById('pause-confirm-btn').disabled = false;
   document.getElementById('pause-modal').classList.add('show');
 }
- 
+
 function closePauseModal() {
   document.getElementById('pause-modal').classList.remove('show');
   pauseTargetStudentId = null;
 }
- 
+
 function updateEndDateMax() {
   const startVal = document.getElementById('pause-start').value;
   if (!startVal) return;
@@ -932,33 +933,33 @@ function updateEndDateMax() {
   maxEnd.setDate(maxEnd.getDate() + 31);
   const maxEndStr = maxEnd.toISOString().split('T')[0];
   document.getElementById('pause-end').max = maxEndStr;
- 
+
   // Also set min for end date = start + 1
   const minEnd = new Date(startDate);
   minEnd.setDate(minEnd.getDate() + 1);
   document.getElementById('pause-end').min = minEnd.toISOString().split('T')[0];
 }
- 
+
 function onPauseStartChange() {
   updateEndDateMax();
   validatePauseDates();
 }
- 
+
 function onPauseEndChange() {
   validatePauseDates();
 }
- 
+
 function validatePauseDates() {
   const startVal = document.getElementById('pause-start').value;
   const endVal = document.getElementById('pause-end').value;
   const errEl = document.getElementById('pause-error');
- 
+
   if (!startVal || !endVal) return;
- 
+
   const start = new Date(startVal);
   const end = new Date(endVal);
   const diffDays = (end - start) / (1000 * 60 * 60 * 24);
- 
+
   if (end <= start) {
     errEl.textContent = 'End date must be after start date.';
     errEl.classList.add('show');
@@ -971,27 +972,27 @@ function validatePauseDates() {
     document.getElementById('pause-confirm-btn').disabled = true;
     return;
   }
- 
+
   errEl.classList.remove('show');
   document.getElementById('pause-confirm-btn').disabled = false;
 }
- 
+
 async function submitPause() {
   const startVal = document.getElementById('pause-start').value;
   const endVal = document.getElementById('pause-end').value;
   const errEl = document.getElementById('pause-error');
- 
+
   if (!startVal || !endVal) {
     errEl.textContent = 'Please select both dates.';
     errEl.classList.add('show');
     return;
   }
- 
+
   const student = currentTeacher.students.find(s => s.id === pauseTargetStudentId);
   const confirmBtn = document.getElementById('pause-confirm-btn');
   confirmBtn.disabled = true;
   confirmBtn.textContent = 'Saving…';
- 
+
   try {
     const params = new URLSearchParams({
       action: 'pause',
@@ -1002,7 +1003,7 @@ async function submitPause() {
     });
     const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
     const result = await res.json();
- 
+
     if (result.success) {
       const endDate = new Date(endVal);
       pausedStudents[student.name] = endDate.toLocaleDateString('en-IN', {
@@ -1012,29 +1013,29 @@ async function submitPause() {
       // Format dates nicely
 const startDateObj = new Date(startVal);
 const endDateObj = new Date(endVal);
- 
+
 const startFormatted = startDateObj.toLocaleDateString('en-IN', {
   day: 'numeric', month: 'short', year: 'numeric'
 });
 const endFormatted = endDateObj.toLocaleDateString('en-IN', {
   day: 'numeric', month: 'short', year: 'numeric'
 });
- 
+
 // Clean WhatsApp message
 let msg = `*Important Update ❗️*
- 
+
 Hello,
- 
+
 ${student.name}'s piano classes are paused from *${startFormatted} to ${endFormatted}*.
- 
+
 Please note that no more pauses are available this year.`;
- 
+
 waMessage = msg;
- 
+
 // Show preview
 document.getElementById('wa-preview').textContent = msg;
 document.getElementById('wa-section').classList.add('show');
- 
+
 // Scroll into view
 setTimeout(() => {
   document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1057,16 +1058,16 @@ setTimeout(() => {
     confirmBtn.textContent = 'Confirm Pause';
   }
 }
- 
+
 // --- Attendance Log ---
- 
+
 async function submitLog() {
   if (!selectedStudentId) return;
   if (!selectedStatus) {
     document.getElementById('att-error').classList.add('show');
     return;
   }
- 
+
   const student = currentTeacher.students.find(s => s.id === selectedStudentId);
   const covered = document.getElementById('covered-note').value.trim();
   const homework = document.getElementById('homework-note').value.trim();
@@ -1074,11 +1075,11 @@ async function submitLog() {
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
- 
+
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
   btn.textContent = 'Submitting…';
- 
+
   const payload = {
     teacher: currentTeacher.name,
     teacherKey: currentTeacher.key,
@@ -1090,10 +1091,10 @@ async function submitLog() {
     homework: homework,
     stage: stage
   };
- 
+
   const submittedStudentName = student.name;
   const submittedStatus2 = selectedStatus;
- 
+
   // Fire and forget — no-cors, can't read response
   try {
     await fetch(APPS_SCRIPT_URL, {
@@ -1103,7 +1104,7 @@ async function submitLog() {
       body: JSON.stringify(payload)
     });
   } catch(e) { /* silent */ }
- 
+
   if (selectedStatus === 'Rescheduled') {
     btn.disabled = false;
     btn.textContent = 'Log Class & Generate Update ✦';
@@ -1129,26 +1130,26 @@ async function submitLog() {
         footerData = { remaining: result.remainingClasses, rescheduled: result.rescheduledCount };
       }
     } catch(e) { /* no footer */ }
- 
+
     // Check local pending makeups for expiring ones
     const studentPending = allPendingMakeups.filter(m =>
       m.student === student.name && m.daysLeft !== undefined && m.daysLeft <= 7 && m.daysLeft > 0
     );
     if (studentPending.length > 0) expiringReschedule = studentPending[0];
   }
- 
+
   if (selectedStatus === 'Attended' || selectedStatus === 'Absent') {
     submittedToday[selectedStudentId] = selectedStatus;
   }
- 
+
   const divider = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
     if (!text) return '';
     return text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
   };
- 
+
   const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
- 
+
   let msg = 'Hi,\n';
   msg += 'Here\'s an update of ' + student.name + '\'s session on ' + dateStr + ' 🎹\n';
   if (stageDisplay) msg += '\n 📌Current Stage: ' + stageDisplay + '\n';
@@ -1179,16 +1180,16 @@ async function submitLog() {
   }
   msg += '\nRegards,\n' + currentTeacher.name;
   waMessage = msg;
- 
+
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
- 
+
   btn.disabled = false;
   btn.textContent = 'Log Class & Generate Update ✦';
   document.getElementById('log-form').style.display = 'none';
   selectedStudentId = null;
   selectedStatus = null;
- 
+
   renderStudents();
   showToast(`✓ ${submittedStudentName} logged as ${submittedStatus2.toLowerCase()}`);
   document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1196,7 +1197,7 @@ async function submitLog() {
 function openWhatsApp() {
   window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
 }
- 
+
 function copyMessage() {
   if (!waMessage) return;
   navigator.clipboard.writeText(waMessage).then(() => {
@@ -1211,7 +1212,7 @@ function copyMessage() {
     showToast('Could not copy — try manually selecting the text');
   });
 }
- 
+
 function showToast(msg) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
@@ -1221,10 +1222,3 @@ function showToast(msg) {
 </script>
 </body>
 </html>
- 
- 
- 
-
-
-
-
