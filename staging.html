@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fortepiano — Teacher App (Staging)</title>
-<link href="https://script.google.com/macros/library/d/1WzqUdQ4GnDrcR6atj9K5wOPYA8tu6xqfqTnYHTzAY9M4Bnx1DJBGLm55/3">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --ink: #1a1410;
@@ -137,32 +137,6 @@
     background: #f0f4ff; color: #4a6fa5; flex-shrink: 0;
   }
  
-  .reschedule-card {
-    background: var(--white);
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .reschedule-info { flex: 1; min-width: 0; }
-  .reschedule-name { font-weight: 500; font-size: 14px; color: var(--ink); }
-  .reschedule-date { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .reschedule-flag { font-size: 18px; flex-shrink: 0; }
- 
-  .reschedule-btn {
-    font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
-    text-transform: uppercase; padding: 6px 12px; border-radius: 100px;
-    background: transparent; border: 1.5px solid var(--border);
-    color: var(--muted); cursor: pointer; flex-shrink: 0;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.18s;
-  }
-  .reschedule-btn:hover { border-color: var(--ink); color: var(--ink); }
- 
   .pause-btn {
     font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
     text-transform: uppercase; padding: 4px 10px; border-radius: 100px;
@@ -202,13 +176,13 @@
   textarea:focus { border-color: var(--gold-light); }
   textarea::placeholder { color: #bfb8ae; }
  
-  input[type="date"], input[type="time"] {
+  input[type="date"] {
     width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
     padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
     color: var(--ink); background: var(--white); outline: none;
     transition: border-color 0.18s;
   }
-  input[type="date"]:focus, input[type="time"]:focus { border-color: var(--gold-light); }
+  input[type="date"]:focus { border-color: var(--gold-light); }
  
   .submit-btn {
     width: 100%; background: var(--ink); color: var(--paper); border: none;
@@ -348,7 +322,63 @@
     cursor: pointer; transition: border-color 0.18s;
   }
   select:focus { border-color: var(--gold-light); }
-</style>
+ 
+  /* Pending Makeups Section */
+  .makeups-section {
+    background: #fffbf4; border: 1.5px solid #e8b86d;
+    border-radius: 16px; padding: 16px; margin-bottom: 24px;
+  }
+  .makeups-header {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.10em;
+    text-transform: uppercase; color: #a07830; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .makeup-card {
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; cursor: pointer;
+    transition: all 0.18s ease; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .makeup-card:last-child { margin-bottom: 0; }
+  .makeup-card:hover { border-color: var(--gold-light); background: #fffbf4; }
+  .makeup-flag { font-size: 18px; flex-shrink: 0; }
+  .makeup-info { flex: 1; min-width: 0; }
+  .makeup-name { font-weight: 600; font-size: 14px; color: var(--ink); }
+  .makeup-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .makeup-days {
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+    padding: 3px 8px; border-radius: 100px;
+  }
+  .makeup-days.urgent { background: #fde8e4; color: var(--rust); }
+  .makeup-days.warning { background: #fdf8ef; color: #a07000; }
+  .makeup-days.ok { background: #f0faf0; color: var(--sage); }
+  .makeup-days.expired { background: #f5f5f5; color: var(--muted); }
+ 
+  /* Reschedule button on student card */
+  .reschedule-btn {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 4px 10px; border-radius: 100px;
+    background: transparent; border: 1.5px solid var(--border);
+    color: var(--muted); cursor: pointer; flex-shrink: 0;
+    font-family: 'DM Sans', sans-serif; transition: all 0.18s;
+  }
+  .reschedule-btn:hover { border-color: var(--gold-light); color: #a07830; }
+ 
+  input[type="time"] {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--ink); background: var(--white); outline: none;
+    transition: border-color 0.18s;
+  }
+  input[type="time"]:focus { border-color: var(--gold-light); }
+ 
+  /* Makeup form banner */
+  .makeup-banner {
+    background: #fffbf4; border: 1.5px solid #e8b86d;
+    border-radius: 12px; padding: 10px 14px; margin-bottom: 16px;
+    font-size: 13px; color: #a07830; font-weight: 500;
+    display: flex; align-items: center; gap: 8px;
+  }
 </head>
 <body>
  <div class="staging-banner">Staging Environment</div>
@@ -361,6 +391,35 @@
 <div id="not-found">
   <h2>Teacher not found</h2>
   <p>This link doesn't match any teacher in the system.<br>Please contact Fortepiano admin.</p>
+</div>
+ 
+<!-- Makeup / Reschedule Modal -->
+<div class="modal-overlay" id="makeup-modal">
+  <div class="modal">
+    <div class="modal-title">Log Makeup Class</div>
+    <div class="modal-sub" id="makeup-modal-sub">Logging a makeup class for the rescheduled session.</div>
+    <div id="makeup-form-fields">
+      <div class="select-group">
+        <label class="field-label">Stage</label>
+        <select id="makeup-stage-select">
+          <option value="">Select Stage</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label class="field-label">What was covered</label>
+        <textarea id="makeup-covered" rows="3" placeholder="e.g. Hanon Ex. 3–4, hands-together practice…" style="width:100%;border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--white);resize:none;outline:none;transition:border-color 0.18s;line-height:1.5;"></textarea>
+      </div>
+      <div class="modal-field">
+        <label class="field-label">Homework / Practice</label>
+        <textarea id="makeup-homework" rows="3" placeholder="e.g. Practice bars 5–12 daily…" style="width:100%;border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--white);resize:none;outline:none;transition:border-color 0.18s;line-height:1.5;"></textarea>
+      </div>
+    </div>
+    <div class="modal-error" id="makeup-error"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeMakeupModal()">Cancel</button>
+      <button class="modal-confirm" id="makeup-confirm-btn" onclick="submitMakeupLog()">Log Makeup ✦</button>
+    </div>
+  </div>
 </div>
  
 <!-- Pause Modal -->
@@ -380,27 +439,6 @@
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closePauseModal()">Cancel</button>
       <button class="modal-confirm" id="pause-confirm-btn" onclick="submitPause()">Confirm Pause</button>
-    </div>
-  </div>
-</div>
- 
-<!-- Reschedule Modal -->
-<div class="modal-overlay" id="reschedule-modal">
-  <div class="modal">
-    <div class="modal-title">Propose Reschedule</div>
-    <div class="modal-sub" id="reschedule-modal-sub">When can you fit this makeup class?</div>
-    <div class="modal-field">
-      <label class="field-label">New Date</label>
-      <input type="date" id="reschedule-date" oninput="onRescheduleDateChange()">
-    </div>
-    <div class="modal-field">
-      <label class="field-label">New Time</label>
-      <input type="time" id="reschedule-time">
-    </div>
-    <div class="modal-error" id="reschedule-error"></div>
-    <div class="modal-actions">
-      <button class="modal-cancel" onclick="closeRescheduleModal()">Cancel</button>
-      <button class="modal-confirm" id="reschedule-confirm-btn" onclick="submitReschedule()">Confirm</button>
     </div>
   </div>
 </div>
@@ -428,13 +466,11 @@
       </div>
     </div>
  
-    <!-- Reschedules Section -->
-    <div id="reschedules-section" style="display:none;">
-      <div class="section-label">Pending Reschedules</div>
-      <div id="pending-reschedules-list"></div>
-      
-      <div class="section-label" style="margin-top:20px;">Confirmed Makeups</div>
-      <div id="confirmed-makeups-list"></div>
+    <div id="pending-makeups-section" style="display:none;">
+      <div class="makeups-section">
+        <div class="makeups-header">🔄 Pending Makeups</div>
+        <div id="pending-makeups-list"></div>
+      </div>
     </div>
  
     <div class="section-label">Select Student</div>
@@ -511,11 +547,10 @@ let selectedStatus = null;
 let submittedToday = {};
 let pausedStudents = {};
 let pauseUsedStudents = {};
+let pendingReschedulesMap = {}; // studentName -> count
+let allPendingMakeups = [];     // full list for the section
 let pauseTargetStudentId = null;
-let rescheduleTargetId = null;
-let rescheduleTargetOriginalDate = null;
-let pendingReschedules = [];
-let confirmedMakeups = [];
+let makeupTarget = null;        // { student, originalDate, flag, daysLeft }
 let waMessage = '';
  
 window.addEventListener('DOMContentLoaded', async () => {
@@ -552,6 +587,7 @@ window.addEventListener('DOMContentLoaded', async () => {
  
     pausedStudents = data.pausedStudents || {};
     pauseUsedStudents = data.pauseUsedStudents || {};
+    pendingReschedulesMap = data.pendingReschedules || {};
  
     document.getElementById('teacher-display-name').textContent = currentTeacher.name;
     document.getElementById('app').style.display = 'flex';
@@ -564,11 +600,14 @@ window.addEventListener('DOMContentLoaded', async () => {
  
     if (data.stages && data.stages.length > 0) {
       const stageSelect = document.getElementById('stage-select');
+      const makeupStageSelect = document.getElementById('makeup-stage-select');
       data.stages.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s.stage;
         opt.textContent = s.stage;
         stageSelect.appendChild(opt);
+        const opt2 = opt.cloneNode(true);
+        makeupStageSelect.appendChild(opt2);
       });
     }
  
@@ -581,9 +620,10 @@ window.addEventListener('DOMContentLoaded', async () => {
       });
     }
  
-    // Load reschedules
-    loadReschedules();
     renderStudents();
+ 
+    // Load pending makeups
+    loadPendingMakeups();
  
   } catch(err) {
     document.getElementById('loading-screen').style.display = 'none';
@@ -595,70 +635,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
  
-async function loadReschedules() {
-  try {
-    const params = new URLSearchParams({
-      action: 'getreschedules',
-      teacher: currentTeacher.name
-    });
-    const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
-    const data = await res.json();
-    
-    if (data.success) {
-      pendingReschedules = data.pending || [];
-      confirmedMakeups = data.confirmed || [];
-      renderReschedules();
-    }
-  } catch(err) {
-    console.error('Error loading reschedules:', err);
-  }
-}
- 
-function renderReschedules() {
-  if (pendingReschedules.length === 0 && confirmedMakeups.length === 0) {
-    document.getElementById('reschedules-section').style.display = 'none';
-    return;
-  }
- 
-  document.getElementById('reschedules-section').style.display = 'block';
- 
-  // Render pending reschedules
-  const pendingList = document.getElementById('pending-reschedules-list');
-  pendingList.innerHTML = '';
-  
-  pendingReschedules.forEach(r => {
-    const card = document.createElement('div');
-    card.className = 'reschedule-card';
-    card.innerHTML = `
-      <div class="reschedule-info">
-        <div class="reschedule-name">${r.student}</div>
-        <div class="reschedule-date">Original: ${new Date(r.originalDate).toLocaleDateString('en-IN', {day:'numeric', month:'short'})}</div>
-      </div>
-      <span class="reschedule-flag">${r.flag}</span>
-      <button class="reschedule-btn" onclick="openRescheduleModal(${r.id}, '${r.originalDate}')">Propose</button>
-    `;
-    pendingList.appendChild(card);
-  });
- 
-  // Render confirmed makeups
-  const confirmedList = document.getElementById('confirmed-makeups-list');
-  confirmedList.innerHTML = '';
-  
-  confirmedMakeups.forEach(m => {
-    const card = document.createElement('div');
-    card.className = 'reschedule-card';
-    const propDate = new Date(m.proposedDate).toLocaleDateString('en-IN', {day:'numeric', month:'short'});
-    card.innerHTML = `
-      <div class="reschedule-info">
-        <div class="reschedule-name">${m.student}</div>
-        <div class="reschedule-date">${propDate} at ${m.proposedTime}</div>
-      </div>
-      <span class="reschedule-flag">📅</span>
-    `;
-    confirmedList.appendChild(card);
-  });
-}
- 
 function renderStudents() {
   const grid = document.getElementById('student-grid');
   grid.innerHTML = '';
@@ -668,6 +644,7 @@ function renderStudents() {
     const submittedStatus = submittedToday[student.id];
     const isPaused = pausedStudents[student.name];
     const pauseUsed = pauseUsedStudents[student.name];
+    const pendingCount = pendingReschedulesMap[student.name] || 0;
  
     const card = document.createElement('div');
  
@@ -685,24 +662,31 @@ function renderStudents() {
       card.onclick = () => selectStudent(student.id);
     }
  
+    // Sub-label: pending reschedule count
+    const subLabel = pendingCount > 0
+      ? `<div class="student-sub">🔄 ${pendingCount} pending makeup${pendingCount > 1 ? 's' : ''}</div>`
+      : '';
+ 
     let rightSlot = '';
     if (isPaused) {
       rightSlot = `<span class="pause-badge">Paused till ${isPaused}</span>`;
     } else if (submittedStatus) {
       rightSlot = `<span class="submitted-badge">${submittedStatus}</span>`;
-    } else if (!pauseUsed) {
+    } else {
+      const pauseBtn = !pauseUsed
+        ? `<button class="pause-btn" onclick="openPauseModal(event, '${student.id}')">Pause</button>`
+        : '';
       rightSlot = `
-        <button class="pause-btn" onclick="openPauseModal(event, '${student.id}')">Pause</button>
+        ${pauseBtn}
         <div class="student-check" id="check-${student.id}">${selectedStudentId === student.id ? '✓' : ''}</div>
       `;
-    } else {
-      rightSlot = `<div class="student-check" id="check-${student.id}">${selectedStudentId === student.id ? '✓' : ''}</div>`;
     }
  
     card.innerHTML = `
       <div class="student-avatar">${initials}</div>
       <div class="student-info">
         <div class="student-name">${student.name}</div>
+        ${subLabel}
       </div>
       ${rightSlot}
     `;
@@ -741,6 +725,170 @@ function selectAttendance(btn) {
   document.getElementById('att-error').classList.remove('show');
 }
  
+// --- Pending Makeups ---
+ 
+async function loadPendingMakeups() {
+  try {
+    const params = new URLSearchParams({
+      action: 'getreschedules',
+      teacher: currentTeacher.name
+    });
+    const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    const result = await res.json();
+    if (result.success) {
+      allPendingMakeups = [...(result.pending || []), ...(result.confirmed || [])];
+      renderPendingMakeups();
+    }
+  } catch(e) { /* silent */ }
+}
+ 
+function renderPendingMakeups() {
+  const section = document.getElementById('pending-makeups-section');
+  const list = document.getElementById('pending-makeups-list');
+  list.innerHTML = '';
+ 
+  const active = allPendingMakeups.filter(m => (m.daysLeft === undefined || m.daysLeft > 0));
+ 
+  if (active.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+ 
+  section.style.display = 'block';
+ 
+  active.forEach(m => {
+    const isConfirmed = !!m.proposedDate;
+    const flag = m.flag || '⏳';
+    const daysLeft = m.daysLeft !== undefined ? m.daysLeft : null;
+ 
+    let daysClass = 'ok';
+    let daysLabel = daysLeft !== null ? `${daysLeft}d left` : 'Confirmed';
+    if (daysLeft !== null) {
+      if (daysLeft <= 0) { daysClass = 'expired'; daysLabel = 'Expired'; }
+      else if (daysLeft <= 7) daysClass = 'urgent';
+      else if (daysLeft <= 17) daysClass = 'warning';
+    }
+ 
+    const originalDateFormatted = formatDateDisplay(m.originalDate);
+    const metaText = isConfirmed
+      ? `Makeup: ${formatDateDisplay(m.proposedDate)}${m.proposedTime ? ' at ' + m.proposedTime : ''}`
+      : `Rescheduled from ${originalDateFormatted}`;
+ 
+    const card = document.createElement('div');
+    card.className = 'makeup-card';
+    card.innerHTML = `
+      <div class="makeup-flag">${flag}</div>
+      <div class="makeup-info">
+        <div class="makeup-name">${m.student}</div>
+        <div class="makeup-meta">${metaText}</div>
+      </div>
+      <div class="makeup-days ${daysClass}">${daysLabel}</div>
+    `;
+    card.onclick = () => openMakeupModal(m);
+    list.appendChild(card);
+  });
+}
+ 
+function formatDateDisplay(dateVal) {
+  if (!dateVal) return '—';
+  const d = new Date(dateVal);
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+ 
+function openMakeupModal(makeup) {
+  makeupTarget = makeup;
+  const isConfirmed = !!makeup.proposedDate;
+  document.getElementById('makeup-modal-sub').textContent =
+    `Logging makeup class for ${makeup.student} — rescheduled from ${formatDateDisplay(makeup.originalDate)}.`;
+  document.getElementById('makeup-covered').value = '';
+  document.getElementById('makeup-homework').value = '';
+  document.getElementById('makeup-stage-select').value = '';
+  document.getElementById('makeup-error').classList.remove('show');
+  document.getElementById('makeup-confirm-btn').disabled = false;
+  document.getElementById('makeup-confirm-btn').textContent = 'Log Makeup ✦';
+  document.getElementById('makeup-modal').classList.add('show');
+}
+ 
+function closeMakeupModal() {
+  document.getElementById('makeup-modal').classList.remove('show');
+  makeupTarget = null;
+}
+ 
+async function submitMakeupLog() {
+  if (!makeupTarget) return;
+ 
+  const covered = document.getElementById('makeup-covered').value.trim();
+  const homework = document.getElementById('makeup-homework').value.trim();
+  const stage = document.getElementById('makeup-stage-select').value;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+ 
+  const confirmBtn = document.getElementById('makeup-confirm-btn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Submitting…';
+ 
+  const payload = {
+    teacher: currentTeacher.name,
+    teacherKey: currentTeacher.key,
+    student: makeupTarget.student,
+    date: dateStr,
+    time: timeStr,
+    status: 'Attended',
+    covered: covered,
+    homework: homework,
+    stage: stage,
+    isMakeup: true,
+    originalRescheduleDate: makeupTarget.originalDate ? makeupTarget.originalDate.toString() : ''
+  };
+ 
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) { /* silent */ }
+ 
+  // Remove from local pending list
+  allPendingMakeups = allPendingMakeups.filter(m =>
+    !(m.student === makeupTarget.student && m.originalDate === makeupTarget.originalDate)
+  );
+  if (pendingReschedulesMap[makeupTarget.student]) {
+    pendingReschedulesMap[makeupTarget.student] = Math.max(0, pendingReschedulesMap[makeupTarget.student] - 1);
+    if (pendingReschedulesMap[makeupTarget.student] === 0) delete pendingReschedulesMap[makeupTarget.student];
+  }
+ 
+  // Build WA message
+  const divider = '━━━━━━━━━━━━━━━';
+  const formatBullets = (text) => text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
+  const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
+  let msg = `Hi,\nHere's an update of ${makeupTarget.student}'s *makeup session* on ${dateStr} 🎹\n`;
+  if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
+  if (covered) {
+    msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
+  }
+  if (homework) {
+    msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
+  }
+  msg += `\nRegards,\n${currentTeacher.name}`;
+  waMessage = msg;
+ 
+  document.getElementById('wa-preview').textContent = msg;
+  document.getElementById('wa-section').classList.add('show');
+ 
+  closeMakeupModal();
+  renderStudents();
+  renderPendingMakeups();
+  showToast(`✓ Makeup class logged for ${makeupTarget.student}`);
+  makeupTarget = null;
+ 
+  setTimeout(() => {
+    document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
+ 
 // --- Pause Modal ---
  
 function openPauseModal(event, studentId) {
@@ -751,15 +899,18 @@ function openPauseModal(event, studentId) {
   document.getElementById('pause-modal-sub').textContent =
     `Set the pause window for ${student.name}. Maximum 31 days. This can only be used once per year.`;
  
+  // Default start date to today
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
   document.getElementById('pause-start').value = todayStr;
   document.getElementById('pause-start').min = todayStr;
  
+  // Default end date to today + 7
   const defaultEnd = new Date(today);
   defaultEnd.setDate(defaultEnd.getDate() + 7);
   document.getElementById('pause-end').value = defaultEnd.toISOString().split('T')[0];
  
+  // Set max end date = start + 31
   updateEndDateMax();
  
   document.getElementById('pause-error').classList.remove('show');
@@ -782,6 +933,7 @@ function updateEndDateMax() {
   const maxEndStr = maxEnd.toISOString().split('T')[0];
   document.getElementById('pause-end').max = maxEndStr;
  
+  // Also set min for end date = start + 1
   const minEnd = new Date(startDate);
   minEnd.setDate(minEnd.getDate() + 1);
   document.getElementById('pause-end').min = minEnd.toISOString().split('T')[0];
@@ -857,18 +1009,19 @@ async function submitPause() {
         day: 'numeric', month: 'short', year: 'numeric'
       });
       pauseUsedStudents[student.name] = true;
-      
-      const startDateObj = new Date(startVal);
-      const endDateObj = new Date(endVal);
+      // Format dates nicely
+const startDateObj = new Date(startVal);
+const endDateObj = new Date(endVal);
  
-      const startFormatted = startDateObj.toLocaleDateString('en-IN', {
-        day: 'numeric', month: 'short', year: 'numeric'
-      });
-      const endFormatted = endDateObj.toLocaleDateString('en-IN', {
-        day: 'numeric', month: 'short', year: 'numeric'
-      });
+const startFormatted = startDateObj.toLocaleDateString('en-IN', {
+  day: 'numeric', month: 'short', year: 'numeric'
+});
+const endFormatted = endDateObj.toLocaleDateString('en-IN', {
+  day: 'numeric', month: 'short', year: 'numeric'
+});
  
-      let msg = `*Important Update ❗️*
+// Clean WhatsApp message
+let msg = `*Important Update ❗️*
  
 Hello,
  
@@ -876,14 +1029,16 @@ ${student.name}'s piano classes are paused from *${startFormatted} to ${endForma
  
 Please note that no more pauses are available this year.`;
  
-      waMessage = msg;
-      document.getElementById('wa-preview').textContent = msg;
-      document.getElementById('wa-section').classList.add('show');
+waMessage = msg;
  
-      setTimeout(() => {
-        document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 100);
-      
+// Show preview
+document.getElementById('wa-preview').textContent = msg;
+document.getElementById('wa-section').classList.add('show');
+ 
+// Scroll into view
+setTimeout(() => {
+  document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}, 100);
       closePauseModal();
       renderStudents();
       document.getElementById('log-form').style.display = 'none';
@@ -900,104 +1055,6 @@ Please note that no more pauses are available this year.`;
     errEl.classList.add('show');
     confirmBtn.disabled = false;
     confirmBtn.textContent = 'Confirm Pause';
-  }
-}
- 
-// --- Reschedule Modal ---
- 
-function openRescheduleModal(rowId, originalDate) {
-  rescheduleTargetId = rowId;
-  rescheduleTargetOriginalDate = originalDate;
- 
-  const rescue = pendingReschedules.find(r => r.id === rowId);
-  if (!rescue) return;
- 
-  document.getElementById('reschedule-modal-sub').textContent = `Propose a makeup date for ${rescue.student}'s original class on ${new Date(originalDate).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}`;
- 
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
-  document.getElementById('reschedule-date').value = todayStr;
-  document.getElementById('reschedule-date').min = todayStr;
- 
-  const origDate = new Date(originalDate);
-  const maxDate = new Date(origDate);
-  maxDate.setDate(maxDate.getDate() + 28);
-  const maxDateStr = maxDate.toISOString().split('T')[0];
-  document.getElementById('reschedule-date').max = maxDateStr;
- 
-  document.getElementById('reschedule-time').value = '';
-  document.getElementById('reschedule-error').classList.remove('show');
-  document.getElementById('reschedule-error').textContent = '';
-  document.getElementById('reschedule-confirm-btn').disabled = false;
-  document.getElementById('reschedule-modal').classList.add('show');
-}
- 
-function closeRescheduleModal() {
-  document.getElementById('reschedule-modal').classList.remove('show');
-  rescheduleTargetId = null;
-  rescheduleTargetOriginalDate = null;
-}
- 
-function onRescheduleDateChange() {
-  document.getElementById('reschedule-error').classList.remove('show');
-}
- 
-async function submitReschedule() {
-  const dateVal = document.getElementById('reschedule-date').value;
-  const timeVal = document.getElementById('reschedule-time').value;
-  const errEl = document.getElementById('reschedule-error');
- 
-  if (!dateVal || !timeVal) {
-    errEl.textContent = 'Please select date and time.';
-    errEl.classList.add('show');
-    return;
-  }
- 
-  const origDate = new Date(rescheduleTargetOriginalDate);
-  const maxDate = new Date(origDate);
-  maxDate.setDate(maxDate.getDate() + 28);
-  const proposedDate = new Date(dateVal);
- 
-  if (proposedDate > maxDate) {
-    errEl.textContent = 'Proposed date is outside 4-week window.';
-    errEl.classList.add('show');
-    return;
-  }
- 
-  const rescue = pendingReschedules.find(r => r.id === rescheduleTargetId);
-  if (!rescue) return;
- 
-  const confirmBtn = document.getElementById('reschedule-confirm-btn');
-  confirmBtn.disabled = true;
-  confirmBtn.textContent = 'Saving…';
- 
-  try {
-    const payload = {
-      action: 'proposereschedule',
-      student: rescue.student,
-      originalDate: rescue.originalDate,
-      proposedDate: dateVal,
-      proposedTime: timeVal
-    };
- 
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
- 
-    // Reload reschedules after a short delay
-    setTimeout(() => {
-      loadReschedules();
-      closeRescheduleModal();
-      showToast(`✓ Makeup scheduled for ${dateVal} at ${timeVal}`);
-    }, 500);
-  } catch(e) {
-    errEl.textContent = 'Connection error. Please try again.';
-    errEl.classList.add('show');
-    confirmBtn.disabled = false;
-    confirmBtn.textContent = 'Confirm';
   }
 }
  
@@ -1034,6 +1091,10 @@ async function submitLog() {
     stage: stage
   };
  
+  const submittedStudentName = student.name;
+  const submittedStatus2 = selectedStatus;
+ 
+  // Fire and forget — no-cors, can't read response
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
@@ -1043,32 +1104,42 @@ async function submitLog() {
     });
   } catch(e) { /* silent */ }
  
+  if (selectedStatus === 'Rescheduled') {
+    btn.disabled = false;
+    btn.textContent = 'Log Class & Generate Update ✦';
+    document.getElementById('log-form').style.display = 'none';
+    document.getElementById('wa-section').classList.remove('show');
+    selectedStudentId = null;
+    selectedStatus = null;
+    // Add to local pending map
+    pendingReschedulesMap[student.name] = (pendingReschedulesMap[student.name] || 0) + 1;
+    renderStudents();
+    showToast(`✓ ${submittedStudentName} logged as rescheduled`);
+    return;
+  }
+  // If Attended, fetch footer stats + check expiring reschedules via separate GET
   let footerData = null;
-  let expiringReschedules = null;
-  
+  let expiringReschedule = null;
   if (selectedStatus === 'Attended') {
     try {
-      const params = new URLSearchParams({
-        action: 'termstats',
-        student: student.name
-      });
+      const params = new URLSearchParams({ action: 'termstats', student: student.name });
       const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
       const result = await res.json();
       if (result.success) {
-        footerData = {
-          remaining: result.remainingClasses,
-          rescheduled: result.rescheduledCount
-        };
+        footerData = { remaining: result.remainingClasses, rescheduled: result.rescheduledCount };
       }
     } catch(e) { /* no footer */ }
  
-    // Check for expiring reschedules
-    expiringReschedules = pendingReschedules.filter(r => r.student === student.name && r.daysLeft <= 7);
+    // Check local pending makeups for expiring ones
+    const studentPending = allPendingMakeups.filter(m =>
+      m.student === student.name && m.daysLeft !== undefined && m.daysLeft <= 7 && m.daysLeft > 0
+    );
+    if (studentPending.length > 0) expiringReschedule = studentPending[0];
   }
  
-  const submittedStudentName = student.name;
-  const submittedStatus2 = selectedStatus;
-  submittedToday[selectedStudentId] = selectedStatus;
+  if (selectedStatus === 'Attended' || selectedStatus === 'Absent') {
+    submittedToday[selectedStudentId] = selectedStatus;
+  }
  
   const divider = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
@@ -1098,17 +1169,14 @@ async function submitLog() {
     msg += '\nRemaining Classes: ' + footerData.remaining + '\n';
     msg += 'Rescheduled: ' + footerData.rescheduled + '/3\n';
   }
- 
-  // Add expiring reschedule warning
-  if (expiringReschedules && expiringReschedules.length > 0) {
-    const r = expiringReschedules[0];
-    msg += '\n━━━━━━━━━━━━━━━\n';
-    msg += '⏰ *Pending Reschedule*\n';
-    msg += 'You had rescheduled a class originally on ' + new Date(r.originalDate).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}) + '.\n';
-    msg += 'Rescheduling window expires in ' + r.daysLeft + ' days.\n';
-    msg += 'Please confirm a makeup date ASAP so we can schedule it.\n';
+  if (expiringReschedule) {
+    const divider2 = '━━━━━━━━━━━━━━━';
+    msg += '\n' + divider2 + '\n';
+    msg += '⏰ *Pending Makeup Session*\n';
+    msg += student.name + ' has a pending makeup session.\n';
+    msg += 'Complete it in ' + expiringReschedule.daysLeft + ' day' + (expiringReschedule.daysLeft === 1 ? '' : 's') + ' to avoid loss of class.\n';
+    msg += divider2 + '\n';
   }
- 
   msg += '\nRegards,\n' + currentTeacher.name;
   waMessage = msg;
  
@@ -1125,7 +1193,6 @@ async function submitLog() {
   showToast(`✓ ${submittedStudentName} logged as ${submittedStatus2.toLowerCase()}`);
   document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
- 
 function openWhatsApp() {
   window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
 }
@@ -1155,8 +1222,8 @@ function showToast(msg) {
 </body>
 </html>
  
-
-
+ 
+ 
 
 
 
