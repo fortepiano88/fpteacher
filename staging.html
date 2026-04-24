@@ -1,12 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fortepiano — Teacher App (Staging)</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
+<link href="https://script.google.com/macros/s/AKfycbweX7KPBX2760Tw7OZFnOJneXbOFBh6uc1u6j_-6UvR2VFew5EIdl-GuDHLJDHfL345Pg/exec">
 <style>
   :root {
     --ink: #1a1410;
@@ -230,7 +228,6 @@
   .copy-btn:hover { border-color: var(--ink); background: var(--cream); }
   .copy-btn.copied { border-color: var(--sage); color: var(--sage); background: #f0faf0; }
 
-  /* Modal */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(26,20,16,0.5); z-index: 200;
@@ -327,6 +324,8 @@
 </style>
 </head>
 <body>
+
+<div class="staging-banner">⚠ STAGING — Test data only. Do not share with teachers.</div>
 
 <div id="loading-screen">
   <div class="loading-brand">Fortepiano</div>
@@ -449,7 +448,8 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxITTH9_ea3QudfK1qlkqwzAVA6biwP3fQ9W2ZJJOMW_x-01_uHQFuc0RkWrLyrdWiw/exec';
+// ─── STAGING URL ───
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYOvSxJnIxXJs4dxPLln7kUaJCJH2gBbhkCqPvMBxk0Bt8SVNb3lzT8JRfbbtinxHIxA/exec';
 
 let currentTeacher = null;
 let selectedStudentId = null;
@@ -567,18 +567,11 @@ function renderStudents() {
     } else if (submittedStatus) {
       rightSlot = `<span class="submitted-badge">${submittedStatus}</span>`;
     } else if (!pauseUsed) {
-      rightSlot = `<button class="pause-btn" onclick="openPauseModal(event, '${student.id}')">Pause</button>`;
-    } else {
-      rightSlot = `<div class="student-check" id="check-${student.id}">${selectedStudentId === student.id ? '✓' : ''}</div>`;
-    }
-
-    // If not paused and not submitted and pause not used, show both check and pause button
-    if (!isPaused && !submittedStatus && !pauseUsed) {
       rightSlot = `
         <button class="pause-btn" onclick="openPauseModal(event, '${student.id}')">Pause</button>
         <div class="student-check" id="check-${student.id}">${selectedStudentId === student.id ? '✓' : ''}</div>
       `;
-    } else if (!isPaused && !submittedStatus && pauseUsed) {
+    } else {
       rightSlot = `<div class="student-check" id="check-${student.id}">${selectedStudentId === student.id ? '✓' : ''}</div>`;
     }
 
@@ -624,8 +617,6 @@ function selectAttendance(btn) {
   document.getElementById('att-error').classList.remove('show');
 }
 
-// --- Pause Modal ---
-
 function openPauseModal(event, studentId) {
   event.stopPropagation();
   pauseTargetStudentId = studentId;
@@ -634,18 +625,15 @@ function openPauseModal(event, studentId) {
   document.getElementById('pause-modal-sub').textContent =
     `Set the pause window for ${student.name}. Maximum 31 days. This can only be used once per year.`;
 
-  // Default start date to today
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
   document.getElementById('pause-start').value = todayStr;
   document.getElementById('pause-start').min = todayStr;
 
-  // Default end date to today + 7
   const defaultEnd = new Date(today);
   defaultEnd.setDate(defaultEnd.getDate() + 7);
   document.getElementById('pause-end').value = defaultEnd.toISOString().split('T')[0];
 
-  // Set max end date = start + 31
   updateEndDateMax();
 
   document.getElementById('pause-error').classList.remove('show');
@@ -665,10 +653,7 @@ function updateEndDateMax() {
   const startDate = new Date(startVal);
   const maxEnd = new Date(startDate);
   maxEnd.setDate(maxEnd.getDate() + 31);
-  const maxEndStr = maxEnd.toISOString().split('T')[0];
-  document.getElementById('pause-end').max = maxEndStr;
-
-  // Also set min for end date = start + 1
+  document.getElementById('pause-end').max = maxEnd.toISOString().split('T')[0];
   const minEnd = new Date(startDate);
   minEnd.setDate(minEnd.getDate() + 1);
   document.getElementById('pause-end').min = minEnd.toISOString().split('T')[0];
@@ -744,36 +729,21 @@ async function submitPause() {
         day: 'numeric', month: 'short', year: 'numeric'
       });
       pauseUsedStudents[student.name] = true;
-      // Format dates nicely
-const startDateObj = new Date(startVal);
-const endDateObj = new Date(endVal);
 
-const startFormatted = startDateObj.toLocaleDateString('en-IN', {
-  day: 'numeric', month: 'short', year: 'numeric'
-});
-const endFormatted = endDateObj.toLocaleDateString('en-IN', {
-  day: 'numeric', month: 'short', year: 'numeric'
-});
+      const startDateObj = new Date(startVal);
+      const endDateObj = new Date(endVal);
+      const startFormatted = startDateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      const endFormatted = endDateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
-// Clean WhatsApp message
-let msg = `*Important Update ❗️*
+      let msg = `*Important Update ❗️*\n\nHello,\n\n${student.name}'s piano classes are paused from *${startFormatted} to ${endFormatted}*.\n\nPlease note that no more pauses are available this year.`;
+      waMessage = msg;
+      document.getElementById('wa-preview').textContent = msg;
+      document.getElementById('wa-section').classList.add('show');
 
-Hello,
+      setTimeout(() => {
+        document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
 
-${student.name}'s piano classes are paused from *${startFormatted} to ${endFormatted}*.
-
-Please note that no more pauses are available this year.`;
-
-waMessage = msg;
-
-// Show preview
-document.getElementById('wa-preview').textContent = msg;
-document.getElementById('wa-section').classList.add('show');
-
-// Scroll into view
-setTimeout(() => {
-  document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}, 100);
       closePauseModal();
       renderStudents();
       document.getElementById('log-form').style.display = 'none';
@@ -792,8 +762,6 @@ setTimeout(() => {
     confirmBtn.textContent = 'Confirm Pause';
   }
 }
-
-// --- Attendance Log ---
 
 async function submitLog() {
   if (!selectedStudentId) return;
@@ -826,7 +794,6 @@ async function submitLog() {
     stage: stage
   };
 
-  // Fire and forget — no-cors, can't read response
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
@@ -836,14 +803,10 @@ async function submitLog() {
     });
   } catch(e) { /* silent */ }
 
-  // If Attended, fetch footer stats via separate GET
-  let footerData = null;
   const submittedStudentName = student.name;
   const submittedStatus2 = selectedStatus;
 
-  // If Rescheduled — log only, no WA panel, no termstats fetch
   if (selectedStatus === 'Rescheduled') {
-    submittedToday[selectedStudentId] = selectedStatus;
     btn.disabled = false;
     btn.textContent = 'Log Class & Generate Update ✦';
     document.getElementById('log-form').style.display = 'none';
@@ -855,29 +818,21 @@ async function submitLog() {
     return;
   }
 
-  // If Attended, fetch footer stats via separate GET
+  let footerData = null;
   if (selectedStatus === 'Attended') {
     try {
-      const params = new URLSearchParams({
-        action: 'termstats',
-        student: student.name
-      });
+      const params = new URLSearchParams({ action: 'termstats', student: student.name });
       const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
       const result = await res.json();
       if (result.success) {
-        footerData = {
-          remaining: result.remainingClasses,
-          rescheduled: result.rescheduledCount
-        };
+        footerData = { remaining: result.remainingClasses, rescheduled: result.rescheduledCount };
       }
     } catch(e) { /* no footer */ }
   }
 
-  const submittedStudentName = student.name;
-  const submittedStatus2 = selectedStatus;
   if (selectedStatus === 'Attended' || selectedStatus === 'Absent') {
-  submittedToday[selectedStudentId] = selectedStatus;
-}
+    submittedToday[selectedStudentId] = selectedStatus;
+  }
 
   const divider = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
@@ -923,6 +878,7 @@ async function submitLog() {
   showToast(`✓ ${submittedStudentName} logged as ${submittedStatus2.toLowerCase()}`);
   document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
 function openWhatsApp() {
   window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
 }
