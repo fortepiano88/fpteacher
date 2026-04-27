@@ -170,7 +170,6 @@
   .att-btn:hover { border-color: var(--gold-light); color: var(--ink); }
   .att-btn.selected-attended { background: #f0faf0; border-color: var(--sage); color: var(--sage); }
   .att-btn.selected-absent { background: #fdf4f2; border-color: var(--rust); color: var(--rust); }
-  .att-btn.selected-rescheduled { background: #fdf8ef; border-color: #b8860b; color: #b8860b; }
 
   .field-group { margin-bottom: 20px; }
   .field-label {
@@ -281,6 +280,56 @@
   }
   .modal-confirm:hover { background: #2d2520; }
   .modal-confirm:disabled { background: var(--muted); cursor: not-allowed; }
+
+  /* Pending Makeups Button */
+  .pending-makeups-btn {
+    width: 100%; background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 20px;
+    cursor: pointer; display: flex; align-items: center; gap: 12px;
+    font-family: 'DM Sans', sans-serif; transition: all 0.18s ease;
+    text-align: left;
+  }
+  .pending-makeups-btn:hover { border-color: var(--gold-light); background: #fffbf4; }
+  .pending-makeups-btn .pmb-icon { font-size: 20px; flex-shrink: 0; }
+  .pending-makeups-btn .pmb-text { flex: 1; }
+  .pending-makeups-btn .pmb-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .pending-makeups-btn .pmb-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .pending-makeups-btn .pmb-badge {
+    background: var(--gold-light); color: white;
+    font-size: 11px; font-weight: 700;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .pending-makeups-btn .pmb-chevron { font-size: 12px; color: var(--muted); flex-shrink: 0; transition: transform 0.2s; }
+  .pending-makeups-btn.open .pmb-chevron { transform: rotate(180deg); }
+
+  /* Pending Makeups Panel */
+  .makeups-panel {
+    display: none; background: #fffbf4; border: 1.5px solid #e8b86d;
+    border-radius: 14px; padding: 16px; margin-bottom: 20px;
+    animation: slideUp 0.2s ease;
+  }
+  .makeups-panel.show { display: block; }
+  .makeup-item {
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .makeup-item:last-child { margin-bottom: 0; }
+  .makeup-flag { font-size: 18px; flex-shrink: 0; }
+  .makeup-info { flex: 1; min-width: 0; }
+  .makeup-name { font-weight: 600; font-size: 14px; color: var(--ink); }
+  .makeup-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .makeup-days {
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+    padding: 3px 8px; border-radius: 100px;
+  }
+  .makeup-days.urgent  { background: #fde8e4; color: var(--rust); }
+  .makeup-days.warning { background: #fdf8ef; color: #a07000; }
+  .makeup-days.ok      { background: #f0faf0; color: var(--sage); }
+  .makeup-days.expired { background: #f5f5f5; color: var(--muted); }
+  .makeups-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 8px 0; }
 
   /* Optional field hint */
   .field-optional {
@@ -446,21 +495,32 @@
       </div>
     </div>
 
+    <button class="pending-makeups-btn" id="pending-makeups-btn" onclick="toggleMakeupsPanel()" style="display:none;">
+      <span class="pmb-icon">🔄</span>
+      <div class="pmb-text">
+        <div class="pmb-title">Pending Make-Ups</div>
+        <div class="pmb-sub" id="pmb-sub-text">Loading…</div>
+      </div>
+      <div class="pmb-badge" id="pmb-badge">0</div>
+      <span class="pmb-chevron">▼</span>
+    </button>
+
+    <div class="makeups-panel" id="makeups-panel">
+      <div id="makeups-panel-list"><div class="makeups-empty">Loading…</div></div>
+    </div>
+
     <div class="section-label">Select Student</div>
     <div class="student-grid" id="student-grid"></div>
 
     <div id="log-form" style="display:none;">
       <div class="section-label" style="margin-top:4px;">Attendance</div>
       <div class="attendance-section">
-        <div class="attendance-row">
+        <div class="attendance-row" style="grid-template-columns: 1fr 1fr;">
           <button class="att-btn" data-status="Attended" onclick="selectAttendance(this)">
             <span class="att-icon">✅</span>Attended
           </button>
           <button class="att-btn" data-status="Absent" onclick="selectAttendance(this)">
             <span class="att-icon">❌</span>Absent
-          </button>
-          <button class="att-btn" data-status="Rescheduled" onclick="selectAttendance(this)">
-            <span class="att-icon">🔄</span>Rescheduled
           </button>
         </div>
         <div class="error-msg" id="att-error">Please select attendance status</div>
@@ -592,6 +652,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 
     renderStudents();
+    loadPendingMakeups();
 
   } catch(err) {
     document.getElementById('loading-screen').style.display = 'none';
@@ -602,6 +663,100 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('not-found').style.display = 'block';
   }
 });
+
+// ─── Pending Make-Ups ─────────────────────────────────────────────────────────
+
+let allPendingMakeups = [];
+
+async function loadPendingMakeups() {
+  try {
+    const params = new URLSearchParams({
+      action:  'getreschedules',
+      teacher: currentTeacher.name
+    });
+    const res    = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    const result = await res.json();
+    if (result.success) {
+      // Only show items that are still pending (not completed, not expired)
+      allPendingMakeups = (result.pending || []).filter(m => m.daysLeft === undefined || m.daysLeft > 0);
+      renderMakeupsButton();
+    }
+  } catch(e) { /* silent */ }
+}
+
+function renderMakeupsButton() {
+  const btn     = document.getElementById('pending-makeups-btn');
+  const badge   = document.getElementById('pmb-badge');
+  const subText = document.getElementById('pmb-sub-text');
+  const count   = allPendingMakeups.length;
+
+  if (count === 0) {
+    btn.style.display = 'none';
+    return;
+  }
+
+  btn.style.display = 'flex';
+  badge.textContent = count;
+  subText.textContent = `${count} session${count > 1 ? 's' : ''} awaiting makeup`;
+}
+
+function toggleMakeupsPanel() {
+  const btn   = document.getElementById('pending-makeups-btn');
+  const panel = document.getElementById('makeups-panel');
+  const isOpen = panel.classList.contains('show');
+
+  if (isOpen) {
+    panel.classList.remove('show');
+    btn.classList.remove('open');
+  } else {
+    renderMakeupsPanel();
+    panel.classList.add('show');
+    btn.classList.add('open');
+  }
+}
+
+function renderMakeupsPanel() {
+  const list = document.getElementById('makeups-panel-list');
+  list.innerHTML = '';
+
+  if (allPendingMakeups.length === 0) {
+    list.innerHTML = '<div class="makeups-empty">No pending makeups 🎉</div>';
+    return;
+  }
+
+  allPendingMakeups.forEach(m => {
+    const daysLeft = m.daysLeft !== undefined ? m.daysLeft : null;
+    const flag     = m.flag || '⏳';
+
+    let daysClass = 'ok';
+    let daysLabel = daysLeft !== null ? `${daysLeft}d left` : '—';
+    if (daysLeft !== null) {
+      if (daysLeft <= 0)       { daysClass = 'expired'; daysLabel = 'Expired'; }
+      else if (daysLeft <= 7)  { daysClass = 'urgent';  }
+      else if (daysLeft <= 17) { daysClass = 'warning'; }
+    }
+
+    const origFormatted = formatDateDisplay(m.originalDate);
+
+    const item = document.createElement('div');
+    item.className = 'makeup-item';
+    item.innerHTML = `
+      <div class="makeup-flag">${flag}</div>
+      <div class="makeup-info">
+        <div class="makeup-name">${m.student}</div>
+        <div class="makeup-meta">Rescheduled from ${origFormatted}</div>
+      </div>
+      <div class="makeup-days ${daysClass}">${daysLabel}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function formatDateDisplay(dateVal) {
+  if (!dateVal) return '—';
+  const d = new Date(dateVal);
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
 
 // ─── Render Students ─────────────────────────────────────────────────────────
 
@@ -632,9 +787,7 @@ function renderStudents() {
       card.onclick = () => selectStudent(student.id);
     }
 
-    const subLabel = pendingCount > 0
-      ? `<div class="student-sub">🔄 ${pendingCount} pending makeup${pendingCount > 1 ? 's' : ''}</div>`
-      : '';
+    const subLabel = '';
 
     let rightSlot = '';
     if (isPaused) {
