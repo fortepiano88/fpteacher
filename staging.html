@@ -147,6 +147,16 @@
   }
   .pause-btn:hover { border-color: var(--rust); color: var(--rust); }
 
+  /* Reschedule button on student card */
+  .reschedule-btn {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 4px 10px; border-radius: 100px;
+    background: transparent; border: 1.5px solid var(--border);
+    color: var(--muted); cursor: pointer; flex-shrink: 0;
+    font-family: 'DM Sans', sans-serif; transition: all 0.18s;
+  }
+  .reschedule-btn:hover { border-color: var(--gold-light); color: #a07830; }
+
   .attendance-section { margin-bottom: 24px; }
   .attendance-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
   .att-btn {
@@ -176,13 +186,15 @@
   textarea:focus { border-color: var(--gold-light); }
   textarea::placeholder { color: #bfb8ae; }
 
-  input[type="date"] {
+  input[type="date"],
+  input[type="time"] {
     width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
     padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
     color: var(--ink); background: var(--white); outline: none;
     transition: border-color 0.18s;
   }
-  input[type="date"]:focus { border-color: var(--gold-light); }
+  input[type="date"]:focus,
+  input[type="time"]:focus { border-color: var(--gold-light); }
 
   .submit-btn {
     width: 100%; background: var(--ink); color: var(--paper); border: none;
@@ -270,6 +282,24 @@
   .modal-confirm:hover { background: #2d2520; }
   .modal-confirm:disabled { background: var(--muted); cursor: not-allowed; }
 
+  /* Optional field hint */
+  .field-optional {
+    font-size: 10px; font-weight: 400; color: var(--muted);
+    text-transform: none; letter-spacing: 0; margin-left: 4px;
+  }
+
+  /* Read-only teacher field */
+  .readonly-field {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--muted); background: var(--cream); outline: none;
+  }
+
+  /* Two-col grid for date+time */
+  .field-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+
   .toast {
     position: fixed; bottom: 24px; left: 50%;
     transform: translateX(-50%) translateY(80px);
@@ -322,63 +352,6 @@
     cursor: pointer; transition: border-color 0.18s;
   }
   select:focus { border-color: var(--gold-light); }
-
-  /* Pending Makeups Section */
-  .makeups-section {
-    background: #fffbf4; border: 1.5px solid #e8b86d;
-    border-radius: 16px; padding: 16px; margin-bottom: 24px;
-  }
-  .makeups-header {
-    font-size: 12px; font-weight: 700; letter-spacing: 0.10em;
-    text-transform: uppercase; color: #a07830; margin-bottom: 12px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .makeup-card {
-    background: var(--white); border: 1.5px solid var(--border);
-    border-radius: 12px; padding: 12px 14px; cursor: pointer;
-    transition: all 0.18s ease; margin-bottom: 8px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .makeup-card:last-child { margin-bottom: 0; }
-  .makeup-card:hover { border-color: var(--gold-light); background: #fffbf4; }
-  .makeup-flag { font-size: 18px; flex-shrink: 0; }
-  .makeup-info { flex: 1; min-width: 0; }
-  .makeup-name { font-weight: 600; font-size: 14px; color: var(--ink); }
-  .makeup-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .makeup-days {
-    font-size: 11px; font-weight: 700; flex-shrink: 0;
-    padding: 3px 8px; border-radius: 100px;
-  }
-  .makeup-days.urgent { background: #fde8e4; color: var(--rust); }
-  .makeup-days.warning { background: #fdf8ef; color: #a07000; }
-  .makeup-days.ok { background: #f0faf0; color: var(--sage); }
-  .makeup-days.expired { background: #f5f5f5; color: var(--muted); }
-
-  /* Reschedule button on student card */
-  .reschedule-btn {
-    font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
-    text-transform: uppercase; padding: 4px 10px; border-radius: 100px;
-    background: transparent; border: 1.5px solid var(--border);
-    color: var(--muted); cursor: pointer; flex-shrink: 0;
-    font-family: 'DM Sans', sans-serif; transition: all 0.18s;
-  }
-  .reschedule-btn:hover { border-color: var(--gold-light); color: #a07830; }
-
-  input[type="time"] {
-    width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
-    padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
-    color: var(--ink); background: var(--white); outline: none;
-    transition: border-color 0.18s;
-  }
-  input[type="time"]:focus { border-color: var(--gold-light); }
-
-  /* Makeup form banner */
-  .makeup-banner {
-    background: #fffbf4; border: 1.5px solid #e8b86d;
-    border-radius: 12px; padding: 10px 14px; margin-bottom: 16px;
-    font-size: 13px; color: #a07830; font-weight: 500;
-    display: flex; align-items: center; gap: 8px;
-  }
 </style>
 </head>
 <body>
@@ -394,31 +367,37 @@
   <p>This link doesn't match any teacher in the system.<br>Please contact Fortepiano admin.</p>
 </div>
 
-<!-- Makeup / Reschedule Modal -->
-<div class="modal-overlay" id="makeup-modal">
+<!-- Reschedule Modal -->
+<div class="modal-overlay" id="reschedule-modal">
   <div class="modal">
-    <div class="modal-title">Log Makeup Class</div>
-    <div class="modal-sub" id="makeup-modal-sub">Logging a makeup class for the rescheduled session.</div>
-    <div id="makeup-form-fields">
-      <div class="select-group">
-        <label class="field-label">Stage</label>
-        <select id="makeup-stage-select">
-          <option value="">Select Stage</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <label class="field-label">What was covered</label>
-        <textarea id="makeup-covered" rows="3" placeholder="e.g. Hanon Ex. 3–4, hands-together practice…" style="width:100%;border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--white);resize:none;outline:none;transition:border-color 0.18s;line-height:1.5;"></textarea>
-      </div>
-      <div class="modal-field">
-        <label class="field-label">Homework / Practice</label>
-        <textarea id="makeup-homework" rows="3" placeholder="e.g. Practice bars 5–12 daily…" style="width:100%;border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--white);resize:none;outline:none;transition:border-color 0.18s;line-height:1.5;"></textarea>
-      </div>
+    <div class="modal-title">Request Class Reschedule</div>
+    <div class="modal-sub" id="reschedule-modal-sub">Log a rescheduled class for this student.</div>
+
+    <div class="modal-field">
+      <label class="field-label">Original Class Date <span style="color:var(--rust)">*</span></label>
+      <input type="date" id="reschedule-original-date">
     </div>
-    <div class="modal-error" id="makeup-error"></div>
+    <div class="modal-field">
+      <label class="field-label">Original Class Time <span style="color:var(--rust)">*</span></label>
+      <input type="time" id="reschedule-original-time">
+    </div>
+    <div class="modal-field">
+      <label class="field-label">Makeup Class Date <span class="field-optional">(optional)</span></label>
+      <input type="date" id="reschedule-makeup-date">
+    </div>
+    <div class="modal-field">
+      <label class="field-label">Makeup Class Time <span class="field-optional">(optional)</span></label>
+      <input type="time" id="reschedule-makeup-time">
+    </div>
+    <div class="modal-field">
+      <label class="field-label">Teacher</label>
+      <div class="readonly-field" id="reschedule-teacher-display">—</div>
+    </div>
+
+    <div class="modal-error" id="reschedule-error"></div>
     <div class="modal-actions">
-      <button class="modal-cancel" onclick="closeMakeupModal()">Cancel</button>
-      <button class="modal-confirm" id="makeup-confirm-btn" onclick="submitMakeupLog()">Log Makeup ✦</button>
+      <button class="modal-cancel" onclick="closeRescheduleModal()">Cancel</button>
+      <button class="modal-confirm" id="reschedule-confirm-btn" onclick="submitReschedule()">Submit ✦</button>
     </div>
   </div>
 </div>
@@ -464,13 +443,6 @@
       <div class="stat-item">
         <div class="stat-val" id="stat-monthly-earnings">—</div>
         <div class="stat-lbl">Earned This Month</div>
-      </div>
-    </div>
-
-    <div id="pending-makeups-section" style="display:none;">
-      <div class="makeups-section">
-        <div class="makeups-header">🔄 Pending Makeups</div>
-        <div id="pending-makeups-list"></div>
       </div>
     </div>
 
@@ -548,11 +520,12 @@ let selectedStatus = null;
 let submittedToday = {};
 let pausedStudents = {};
 let pauseUsedStudents = {};
-let pendingReschedulesMap = {}; // studentName -> count
-let allPendingMakeups = [];     // full list for the section
+let pendingReschedulesMap = {};
 let pauseTargetStudentId = null;
-let makeupTarget = null;        // { student, originalDate, flag, daysLeft }
+let rescheduleTargetStudentId = null;
 let waMessage = '';
+
+// ─── Init ────────────────────────────────────────────────────────────────────
 
 window.addEventListener('DOMContentLoaded', async () => {
   const now = new Date();
@@ -586,7 +559,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       students: data.students.map((name, i) => ({ id: `s${i}`, name: name.trim() }))
     };
 
-    pausedStudents = data.pausedStudents || {};
+    pausedStudents    = data.pausedStudents    || {};
     pauseUsedStudents = data.pauseUsedStudents || {};
     pendingReschedulesMap = data.pendingReschedules || {};
 
@@ -601,14 +574,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     if (data.stages && data.stages.length > 0) {
       const stageSelect = document.getElementById('stage-select');
-      const makeupStageSelect = document.getElementById('makeup-stage-select');
       data.stages.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s.stage;
         opt.textContent = s.stage;
         stageSelect.appendChild(opt);
-        const opt2 = opt.cloneNode(true);
-        makeupStageSelect.appendChild(opt2);
       });
     }
 
@@ -623,9 +593,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     renderStudents();
 
-    // Load pending makeups
-    loadPendingMakeups();
-
   } catch(err) {
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('not-found').innerHTML = `
@@ -636,6 +603,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// ─── Render Students ─────────────────────────────────────────────────────────
+
 function renderStudents() {
   const grid = document.getElementById('student-grid');
   grid.innerHTML = '';
@@ -643,8 +612,8 @@ function renderStudents() {
   currentTeacher.students.forEach(student => {
     const initials = student.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const submittedStatus = submittedToday[student.id];
-    const isPaused = pausedStudents[student.name];
-    const pauseUsed = pauseUsedStudents[student.name];
+    const isPaused    = pausedStudents[student.name];
+    const pauseUsed   = pauseUsedStudents[student.name];
     const pendingCount = pendingReschedulesMap[student.name] || 0;
 
     const card = document.createElement('div');
@@ -663,7 +632,6 @@ function renderStudents() {
       card.onclick = () => selectStudent(student.id);
     }
 
-    // Sub-label: pending reschedule count
     const subLabel = pendingCount > 0
       ? `<div class="student-sub">🔄 ${pendingCount} pending makeup${pendingCount > 1 ? 's' : ''}</div>`
       : '';
@@ -678,7 +646,7 @@ function renderStudents() {
         ? `<button class="pause-btn" onclick="openPauseModal(event, '${student.id}')">Pause</button>`
         : '';
       rightSlot = `
-        <button class="reschedule-btn" onclick="openRescheduleFromCard(event, '${student.id}')">Reschedule</button>
+        <button class="reschedule-btn" onclick="openRescheduleModal(event, '${student.id}')">Reschedule</button>
         ${pauseBtn}
         <div class="student-check" id="check-${student.id}">${selectedStudentId === student.id ? '✓' : ''}</div>
       `;
@@ -697,12 +665,14 @@ function renderStudents() {
   });
 }
 
+// ─── Select Student ───────────────────────────────────────────────────────────
+
 function selectStudent(studentId) {
   selectedStudentId = studentId;
-  selectedStatus = null;
-  document.getElementById('covered-note').value = '';
+  selectedStatus    = null;
+  document.getElementById('covered-note').value  = '';
   document.getElementById('homework-note').value = '';
-  document.getElementById('stage-select').value = '';
+  document.getElementById('stage-select').value  = '';
   document.getElementById('wa-section').classList.remove('show');
 
   document.querySelectorAll('.student-card').forEach(c => c.classList.remove('selected'));
@@ -720,6 +690,8 @@ function selectStudent(studentId) {
   }, 100);
 }
 
+// ─── Attendance ───────────────────────────────────────────────────────────────
+
 function selectAttendance(btn) {
   document.querySelectorAll('.att-btn').forEach(b => b.className = 'att-btn');
   selectedStatus = btn.dataset.status;
@@ -727,131 +699,89 @@ function selectAttendance(btn) {
   document.getElementById('att-error').classList.remove('show');
 }
 
-function openRescheduleFromCard(event, studentId) {
+// ─── Reschedule Modal ─────────────────────────────────────────────────────────
+
+function openRescheduleModal(event, studentId) {
   event.stopPropagation();
-  selectStudent(studentId);
-  // Pre-select Rescheduled
-  setTimeout(() => {
-    const rescheduleBtn = document.querySelector('.att-btn[data-status="Rescheduled"]');
-    if (rescheduleBtn) selectAttendance(rescheduleBtn);
-  }, 150);
+  rescheduleTargetStudentId = studentId;
+
+  const student = currentTeacher.students.find(s => s.id === studentId);
+  document.getElementById('reschedule-modal-sub').textContent =
+    `Log a rescheduled class for ${student.name}.`;
+  document.getElementById('reschedule-teacher-display').textContent = currentTeacher.name;
+
+  // Default original date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('reschedule-original-date').value = today;
+  document.getElementById('reschedule-original-time').value = '';
+  document.getElementById('reschedule-makeup-date').value   = '';
+  document.getElementById('reschedule-makeup-time').value   = '';
+
+  document.getElementById('reschedule-error').classList.remove('show');
+  document.getElementById('reschedule-error').textContent = '';
+  document.getElementById('reschedule-confirm-btn').disabled    = false;
+  document.getElementById('reschedule-confirm-btn').textContent = 'Submit ✦';
+
+  document.getElementById('reschedule-modal').classList.add('show');
 }
 
-// --- Pending Makeups ---
-
-async function loadPendingMakeups() {
-  try {
-    const params = new URLSearchParams({
-      action: 'getreschedules',
-      teacher: currentTeacher.name
-    });
-    const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
-    const result = await res.json();
-    if (result.success) {
-      allPendingMakeups = [...(result.pending || []), ...(result.confirmed || [])];
-      renderPendingMakeups();
-    }
-  } catch(e) { /* silent */ }
+function closeRescheduleModal() {
+  document.getElementById('reschedule-modal').classList.remove('show');
+  rescheduleTargetStudentId = null;
 }
 
-function renderPendingMakeups() {
-  const section = document.getElementById('pending-makeups-section');
-  const list = document.getElementById('pending-makeups-list');
-  list.innerHTML = '';
+async function submitReschedule() {
+  const originalDate = document.getElementById('reschedule-original-date').value;
+  const originalTime = document.getElementById('reschedule-original-time').value;
+  const makeupDate   = document.getElementById('reschedule-makeup-date').value;
+  const makeupTime   = document.getElementById('reschedule-makeup-time').value;
+  const errEl        = document.getElementById('reschedule-error');
 
-  const active = allPendingMakeups.filter(m => (m.daysLeft === undefined || m.daysLeft > 0));
-
-  if (active.length === 0) {
-    section.style.display = 'none';
+  // Validation
+  if (!originalDate) {
+    errEl.textContent = 'Please select the original class date.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (!originalTime) {
+    errEl.textContent = 'Please enter the original class time.';
+    errEl.classList.add('show');
     return;
   }
 
-  section.style.display = 'block';
+  errEl.classList.remove('show');
 
-  active.forEach(m => {
-    const isConfirmed = !!m.proposedDate;
-    const flag = m.flag || '⏳';
-    const daysLeft = m.daysLeft !== undefined ? m.daysLeft : null;
-
-    let daysClass = 'ok';
-    let daysLabel = daysLeft !== null ? `${daysLeft}d left` : 'Confirmed';
-    if (daysLeft !== null) {
-      if (daysLeft <= 0) { daysClass = 'expired'; daysLabel = 'Expired'; }
-      else if (daysLeft <= 7) daysClass = 'urgent';
-      else if (daysLeft <= 17) daysClass = 'warning';
-    }
-
-    const originalDateFormatted = formatDateDisplay(m.originalDate);
-    const metaText = isConfirmed
-      ? `Makeup: ${formatDateDisplay(m.proposedDate)}${m.proposedTime ? ' at ' + m.proposedTime : ''}`
-      : `Rescheduled from ${originalDateFormatted}`;
-
-    const card = document.createElement('div');
-    card.className = 'makeup-card';
-    card.innerHTML = `
-      <div class="makeup-flag">${flag}</div>
-      <div class="makeup-info">
-        <div class="makeup-name">${m.student}</div>
-        <div class="makeup-meta">${metaText}</div>
-      </div>
-      <div class="makeup-days ${daysClass}">${daysLabel}</div>
-    `;
-    card.onclick = () => openMakeupModal(m);
-    list.appendChild(card);
-  });
-}
-
-function formatDateDisplay(dateVal) {
-  if (!dateVal) return '—';
-  const d = new Date(dateVal);
-  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-}
-
-function openMakeupModal(makeup) {
-  makeupTarget = makeup;
-  const isConfirmed = !!makeup.proposedDate;
-  document.getElementById('makeup-modal-sub').textContent =
-    `Logging makeup class for ${makeup.student} — rescheduled from ${formatDateDisplay(makeup.originalDate)}.`;
-  document.getElementById('makeup-covered').value = '';
-  document.getElementById('makeup-homework').value = '';
-  document.getElementById('makeup-stage-select').value = '';
-  document.getElementById('makeup-error').classList.remove('show');
-  document.getElementById('makeup-confirm-btn').disabled = false;
-  document.getElementById('makeup-confirm-btn').textContent = 'Log Makeup ✦';
-  document.getElementById('makeup-modal').classList.add('show');
-}
-
-function closeMakeupModal() {
-  document.getElementById('makeup-modal').classList.remove('show');
-  makeupTarget = null;
-}
-
-async function submitMakeupLog() {
-  if (!makeupTarget) return;
-
-  const covered = document.getElementById('makeup-covered').value.trim();
-  const homework = document.getElementById('makeup-homework').value.trim();
-  const stage = document.getElementById('makeup-stage-select').value;
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-
-  const confirmBtn = document.getElementById('makeup-confirm-btn');
-  confirmBtn.disabled = true;
+  const student    = currentTeacher.students.find(s => s.id === rescheduleTargetStudentId);
+  const confirmBtn = document.getElementById('reschedule-confirm-btn');
+  confirmBtn.disabled    = true;
   confirmBtn.textContent = 'Submitting…';
 
+  // Format original date for display
+  const origDateObj = new Date(originalDate);
+  const origDateFormatted = origDateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  const origTimeFormatted = formatTime12h(originalTime);
+
+  // Format makeup info
+  const makeupDateFormatted = makeupDate
+    ? new Date(makeupDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+    : 'Not Decided';
+  const makeupTimeFormatted = makeupTime ? formatTime12h(makeupTime) : 'Not Decided';
+
   const payload = {
-    teacher: currentTeacher.name,
-    teacherKey: currentTeacher.key,
-    student: makeupTarget.student,
-    date: dateStr,
-    time: timeStr,
-    status: 'Attended',
-    covered: covered,
-    homework: homework,
-    stage: stage,
-    isMakeup: true,
-    originalRescheduleDate: makeupTarget.originalDate ? makeupTarget.originalDate.toString() : ''
+    teacher:      currentTeacher.name,
+    teacherKey:   currentTeacher.key,
+    student:      student.name,
+    status:       'Rescheduled',
+    originalDate: originalDate,
+    originalTime: originalTime,
+    makeupDate:   makeupDate   || '',
+    makeupTime:   makeupTime   || '',
+    // Also log to Attendance sheet
+    date: origDateFormatted,
+    time: origTimeFormatted,
+    covered:  '',
+    homework: '',
+    stage:    ''
   };
 
   try {
@@ -863,45 +793,40 @@ async function submitMakeupLog() {
     });
   } catch(e) { /* silent */ }
 
-  // Remove from local pending list
-  allPendingMakeups = allPendingMakeups.filter(m =>
-    !(m.student === makeupTarget.student && m.originalDate === makeupTarget.originalDate)
-  );
-  if (pendingReschedulesMap[makeupTarget.student]) {
-    pendingReschedulesMap[makeupTarget.student] = Math.max(0, pendingReschedulesMap[makeupTarget.student] - 1);
-    if (pendingReschedulesMap[makeupTarget.student] === 0) delete pendingReschedulesMap[makeupTarget.student];
-  }
+  // Update local pending count
+  pendingReschedulesMap[student.name] = (pendingReschedulesMap[student.name] || 0) + 1;
 
-  // Build WA message
-  const divider = '━━━━━━━━━━━━━━━';
-  const formatBullets = (text) => text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
-  const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
-  let msg = `Hi,\nHere's an update of ${makeupTarget.student}'s *makeup session* on ${dateStr} 🎹\n`;
-  if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
-  if (covered) {
-    msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
-  }
-  if (homework) {
-    msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
-  }
-  msg += `\nRegards,\n${currentTeacher.name}`;
+  // Build WhatsApp message
+  let msg = `Hi,\n`;
+  msg += `*${student.name}'s* session on *${origDateFormatted} at ${origTimeFormatted}* is rescheduled.\n\n`;
+  msg += `📅 *Makeup Class*\n`;
+  msg += `Date: ${makeupDateFormatted}\n`;
+  msg += `Time: ${makeupTimeFormatted}\n\n`;
+  msg += `Regards,\n${currentTeacher.name}`;
   waMessage = msg;
 
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
 
-  closeMakeupModal();
+  closeRescheduleModal();
   renderStudents();
-  renderPendingMakeups();
-  showToast(`✓ Makeup class logged for ${makeupTarget.student}`);
-  makeupTarget = null;
+  showToast(`✓ ${student.name} logged as rescheduled`);
 
   setTimeout(() => {
     document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 100);
 }
 
-// --- Pause Modal ---
+// Helper: format "14:30" → "2:30 PM"
+function formatTime12h(timeStr) {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour   = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+// ─── Pause Modal ──────────────────────────────────────────────────────────────
 
 function openPauseModal(event, studentId) {
   event.stopPropagation();
@@ -911,23 +836,20 @@ function openPauseModal(event, studentId) {
   document.getElementById('pause-modal-sub').textContent =
     `Set the pause window for ${student.name}. Maximum 31 days. This can only be used once per year.`;
 
-  // Default start date to today
-  const today = new Date();
+  const today    = new Date();
   const todayStr = today.toISOString().split('T')[0];
   document.getElementById('pause-start').value = todayStr;
-  document.getElementById('pause-start').min = todayStr;
+  document.getElementById('pause-start').min   = todayStr;
 
-  // Default end date to today + 7
   const defaultEnd = new Date(today);
   defaultEnd.setDate(defaultEnd.getDate() + 7);
   document.getElementById('pause-end').value = defaultEnd.toISOString().split('T')[0];
 
-  // Set max end date = start + 31
   updateEndDateMax();
 
   document.getElementById('pause-error').classList.remove('show');
   document.getElementById('pause-error').textContent = '';
-  document.getElementById('pause-confirm-btn').disabled = false;
+  document.getElementById('pause-confirm-btn').disabled    = false;
   document.getElementById('pause-modal').classList.add('show');
 }
 
@@ -940,35 +862,27 @@ function updateEndDateMax() {
   const startVal = document.getElementById('pause-start').value;
   if (!startVal) return;
   const startDate = new Date(startVal);
-  const maxEnd = new Date(startDate);
+  const maxEnd    = new Date(startDate);
   maxEnd.setDate(maxEnd.getDate() + 31);
-  const maxEndStr = maxEnd.toISOString().split('T')[0];
-  document.getElementById('pause-end').max = maxEndStr;
+  document.getElementById('pause-end').max = maxEnd.toISOString().split('T')[0];
 
-  // Also set min for end date = start + 1
   const minEnd = new Date(startDate);
   minEnd.setDate(minEnd.getDate() + 1);
   document.getElementById('pause-end').min = minEnd.toISOString().split('T')[0];
 }
 
-function onPauseStartChange() {
-  updateEndDateMax();
-  validatePauseDates();
-}
-
-function onPauseEndChange() {
-  validatePauseDates();
-}
+function onPauseStartChange() { updateEndDateMax(); validatePauseDates(); }
+function onPauseEndChange()   { validatePauseDates(); }
 
 function validatePauseDates() {
   const startVal = document.getElementById('pause-start').value;
-  const endVal = document.getElementById('pause-end').value;
-  const errEl = document.getElementById('pause-error');
+  const endVal   = document.getElementById('pause-end').value;
+  const errEl    = document.getElementById('pause-error');
 
   if (!startVal || !endVal) return;
 
-  const start = new Date(startVal);
-  const end = new Date(endVal);
+  const start    = new Date(startVal);
+  const end      = new Date(endVal);
   const diffDays = (end - start) / (1000 * 60 * 60 * 24);
 
   if (end <= start) {
@@ -990,8 +904,8 @@ function validatePauseDates() {
 
 async function submitPause() {
   const startVal = document.getElementById('pause-start').value;
-  const endVal = document.getElementById('pause-end').value;
-  const errEl = document.getElementById('pause-error');
+  const endVal   = document.getElementById('pause-end').value;
+  const errEl    = document.getElementById('pause-error');
 
   if (!startVal || !endVal) {
     errEl.textContent = 'Please select both dates.';
@@ -999,58 +913,41 @@ async function submitPause() {
     return;
   }
 
-  const student = currentTeacher.students.find(s => s.id === pauseTargetStudentId);
+  const student    = currentTeacher.students.find(s => s.id === pauseTargetStudentId);
   const confirmBtn = document.getElementById('pause-confirm-btn');
-  confirmBtn.disabled = true;
+  confirmBtn.disabled    = true;
   confirmBtn.textContent = 'Saving…';
 
   try {
     const params = new URLSearchParams({
-      action: 'pause',
-      student: student.name,
-      teacher: currentTeacher.name,
+      action:     'pause',
+      student:    student.name,
+      teacher:    currentTeacher.name,
       pauseStart: startVal,
-      pauseEnd: endVal
+      pauseEnd:   endVal
     });
-    const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    const res    = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
     const result = await res.json();
 
     if (result.success) {
       const endDate = new Date(endVal);
-      pausedStudents[student.name] = endDate.toLocaleDateString('en-IN', {
-        day: 'numeric', month: 'short', year: 'numeric'
-      });
+      pausedStudents[student.name]    = endDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
       pauseUsedStudents[student.name] = true;
-      // Format dates nicely
-const startDateObj = new Date(startVal);
-const endDateObj = new Date(endVal);
 
-const startFormatted = startDateObj.toLocaleDateString('en-IN', {
-  day: 'numeric', month: 'short', year: 'numeric'
-});
-const endFormatted = endDateObj.toLocaleDateString('en-IN', {
-  day: 'numeric', month: 'short', year: 'numeric'
-});
+      const startDateObj   = new Date(startVal);
+      const startFormatted = startDateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      const endFormatted   = endDate.toLocaleDateString('en-IN',     { day: 'numeric', month: 'short', year: 'numeric' });
 
-// Clean WhatsApp message
-let msg = `*Important Update ❗️*
+      let msg = `*Important Update ❗️*\n\nHello,\n\n${student.name}'s piano classes are paused from *${startFormatted} to ${endFormatted}*.\n\nPlease note that no more pauses are available this year.`;
+      waMessage = msg;
 
-Hello,
+      document.getElementById('wa-preview').textContent = msg;
+      document.getElementById('wa-section').classList.add('show');
 
-${student.name}'s piano classes are paused from *${startFormatted} to ${endFormatted}*.
+      setTimeout(() => {
+        document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
 
-Please note that no more pauses are available this year.`;
-
-waMessage = msg;
-
-// Show preview
-document.getElementById('wa-preview').textContent = msg;
-document.getElementById('wa-section').classList.add('show');
-
-// Scroll into view
-setTimeout(() => {
-  document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}, 100);
       closePauseModal();
       renderStudents();
       document.getElementById('log-form').style.display = 'none';
@@ -1059,18 +956,18 @@ setTimeout(() => {
     } else {
       errEl.textContent = result.error || 'Something went wrong. Please try again.';
       errEl.classList.add('show');
-      confirmBtn.disabled = false;
+      confirmBtn.disabled    = false;
       confirmBtn.textContent = 'Confirm Pause';
     }
   } catch(e) {
     errEl.textContent = 'Connection error. Please try again.';
     errEl.classList.add('show');
-    confirmBtn.disabled = false;
+    confirmBtn.disabled    = false;
     confirmBtn.textContent = 'Confirm Pause';
   }
 }
 
-// --- Attendance Log ---
+// ─── Attendance Log ───────────────────────────────────────────────────────────
 
 async function submitLog() {
   if (!selectedStudentId) return;
@@ -1079,34 +976,33 @@ async function submitLog() {
     return;
   }
 
-  const student = currentTeacher.students.find(s => s.id === selectedStudentId);
-  const covered = document.getElementById('covered-note').value.trim();
+  const student  = currentTeacher.students.find(s => s.id === selectedStudentId);
+  const covered  = document.getElementById('covered-note').value.trim();
   const homework = document.getElementById('homework-note').value.trim();
-  const stage = document.getElementById('stage-select').value;
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  const stage    = document.getElementById('stage-select').value;
+  const now      = new Date();
+  const dateStr  = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
   const btn = document.getElementById('submit-btn');
-  btn.disabled = true;
+  btn.disabled    = true;
   btn.textContent = 'Submitting…';
 
   const payload = {
-    teacher: currentTeacher.name,
+    teacher:   currentTeacher.name,
     teacherKey: currentTeacher.key,
-    student: student.name,
-    date: dateStr,
-    time: timeStr,
-    status: selectedStatus,
-    covered: covered,
-    homework: homework,
-    stage: stage
+    student:   student.name,
+    date:      dateStr,
+    time:      timeStr,
+    status:    selectedStatus,
+    covered:   covered,
+    homework:  homework,
+    stage:     stage
   };
 
   const submittedStudentName = student.name;
-  const submittedStatus2 = selectedStatus;
+  const submittedStatus2     = selectedStatus;
 
-  // Fire and forget — no-cors, can't read response
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
@@ -1116,44 +1012,39 @@ async function submitLog() {
     });
   } catch(e) { /* silent */ }
 
+  // If Rescheduled via the attendance button: just log + update count, no WA message here
+  // (Teacher should use the Reschedule button on the card for the proper flow)
   if (selectedStatus === 'Rescheduled') {
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = 'Log Class & Generate Update ✦';
     document.getElementById('log-form').style.display = 'none';
     document.getElementById('wa-section').classList.remove('show');
     selectedStudentId = null;
-    selectedStatus = null;
-    // Add to local pending map
+    selectedStatus    = null;
     pendingReschedulesMap[student.name] = (pendingReschedulesMap[student.name] || 0) + 1;
     renderStudents();
     showToast(`✓ ${submittedStudentName} logged as rescheduled`);
     return;
   }
-  // If Attended, fetch footer stats + check expiring reschedules via separate GET
+
+  // Fetch term stats for Attended
   let footerData = null;
-  let expiringReschedule = null;
   if (selectedStatus === 'Attended') {
     try {
       const params = new URLSearchParams({ action: 'termstats', student: student.name });
-      const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+      const res    = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
       const result = await res.json();
       if (result.success) {
         footerData = { remaining: result.remainingClasses, rescheduled: result.rescheduledCount };
       }
     } catch(e) { /* no footer */ }
-
-    // Check local pending makeups for expiring ones
-    const studentPending = allPendingMakeups.filter(m =>
-      m.student === student.name && m.daysLeft !== undefined && m.daysLeft <= 7 && m.daysLeft > 0
-    );
-    if (studentPending.length > 0) expiringReschedule = studentPending[0];
   }
 
   if (selectedStatus === 'Attended' || selectedStatus === 'Absent') {
     submittedToday[selectedStudentId] = selectedStatus;
   }
 
-  const divider = '━━━━━━━━━━━━━━━';
+  const divider      = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
     if (!text) return '';
     return text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
@@ -1162,49 +1053,37 @@ async function submitLog() {
   const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
 
   let msg = 'Hi,\n';
-  msg += 'Here\'s an update of ' + student.name + '\'s session on ' + dateStr + ' 🎹\n';
-  if (stageDisplay) msg += '\n 📌Current Stage: ' + stageDisplay + '\n';
+  msg += `Here's an update of ${student.name}'s session on ${dateStr} 🎹\n`;
+  if (stageDisplay) msg += `\n 📌Current Stage: ${stageDisplay}\n`;
   if (covered) {
-    msg += divider + '\n';
-    msg += '📖 *What We Covered*\n';
-    msg += divider + '\n';
-    msg += formatBullets(covered) + '\n';
+    msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
   }
   if (homework) {
-    msg += divider + '\n';
-    msg += '🏠 *Practice This Week*\n';
-    msg += divider + '\n';
-    msg += formatBullets(homework) + '\n';
-    msg += divider + '\n';
+    msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
   }
   if (footerData) {
-    msg += '\nRemaining Classes: ' + footerData.remaining + '\n';
-    msg += 'Rescheduled: ' + footerData.rescheduled + '/3\n';
+    msg += `\nRemaining Classes: ${footerData.remaining}\n`;
+    msg += `Rescheduled: ${footerData.rescheduled}/3\n`;
   }
-  if (expiringReschedule) {
-    const divider2 = '━━━━━━━━━━━━━━━';
-    msg += '\n' + divider2 + '\n';
-    msg += '⏰ *Pending Makeup Session*\n';
-    msg += student.name + ' has a pending makeup session.\n';
-    msg += 'Complete it in ' + expiringReschedule.daysLeft + ' day' + (expiringReschedule.daysLeft === 1 ? '' : 's') + ' to avoid loss of class.\n';
-    msg += divider2 + '\n';
-  }
-  msg += '\nRegards,\n' + currentTeacher.name;
+  msg += `\nRegards,\n${currentTeacher.name}`;
   waMessage = msg;
 
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
 
-  btn.disabled = false;
+  btn.disabled    = false;
   btn.textContent = 'Log Class & Generate Update ✦';
   document.getElementById('log-form').style.display = 'none';
   selectedStudentId = null;
-  selectedStatus = null;
+  selectedStatus    = null;
 
   renderStudents();
   showToast(`✓ ${submittedStudentName} logged as ${submittedStatus2.toLowerCase()}`);
   document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
+// ─── WhatsApp / Copy ──────────────────────────────────────────────────────────
+
 function openWhatsApp() {
   window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
 }
