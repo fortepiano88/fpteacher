@@ -495,18 +495,44 @@
       </div>
     </div>
 
-    <button class="pending-makeups-btn" id="pending-makeups-btn" onclick="toggleMakeupsPanel()" style="display:none;">
+    <button class="pending-makeups-btn" id="pending-makeups-btn" onclick="toggleMakeupsPanel()">
       <span class="pmb-icon">🔄</span>
       <div class="pmb-text">
         <div class="pmb-title">Pending Make-Ups</div>
         <div class="pmb-sub" id="pmb-sub-text">Loading…</div>
       </div>
-      <div class="pmb-badge" id="pmb-badge">0</div>
+      <div class="pmb-badge" id="pmb-badge" style="display:none;">0</div>
       <span class="pmb-chevron">▼</span>
     </button>
 
     <div class="makeups-panel" id="makeups-panel">
       <div id="makeups-panel-list"><div class="makeups-empty">Loading…</div></div>
+
+      <!-- Makeup Log Form — shown when a makeup item is selected -->
+      <div id="makeup-log-form" style="display:none; margin-top:14px; border-top:1.5px solid #e8b86d; padding-top:14px;">
+        <div class="section-label" style="margin-bottom:10px;">Log Makeup Class — <span id="makeup-form-student-label" style="text-transform:none; letter-spacing:0; font-weight:600; color:var(--ink);"></span></div>
+
+        <div class="select-group">
+          <label class="field-label">Stage</label>
+          <select id="makeup-stage-select">
+            <option value="">Select Stage</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">What was covered</label>
+          <textarea id="makeup-covered" rows="3" placeholder="e.g. Hanon Ex. 3–4, hands-together practice…"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Homework / Practice Instructions</label>
+          <textarea id="makeup-homework" rows="3" placeholder="e.g. Practice bars 5–12 daily…"></textarea>
+        </div>
+
+        <button class="submit-btn" id="makeup-submit-btn" onclick="submitMakeupLog()">
+          Log Makeup & Generate Update ✦
+        </button>
+      </div>
     </div>
 
     <div class="section-label">Select Student</div>
@@ -633,12 +659,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (data.stages && data.stages.length > 0) {
-      const stageSelect = document.getElementById('stage-select');
+      const stageSelect       = document.getElementById('stage-select');
+      const makeupStageSelect = document.getElementById('makeup-stage-select');
       data.stages.forEach(s => {
         const opt = document.createElement('option');
-        opt.value = s.stage;
+        opt.value       = s.stage;
         opt.textContent = s.stage;
         stageSelect.appendChild(opt);
+        makeupStageSelect.appendChild(opt.cloneNode(true));
       });
     }
 
@@ -685,19 +713,18 @@ async function loadPendingMakeups() {
 }
 
 function renderMakeupsButton() {
-  const btn     = document.getElementById('pending-makeups-btn');
   const badge   = document.getElementById('pmb-badge');
   const subText = document.getElementById('pmb-sub-text');
   const count   = allPendingMakeups.length;
 
   if (count === 0) {
-    btn.style.display = 'none';
-    return;
+    badge.style.display = 'none';
+    subText.textContent = 'No pending makeups';
+  } else {
+    badge.style.display = 'flex';
+    badge.textContent   = count;
+    subText.textContent = `${count} session${count > 1 ? 's' : ''} awaiting makeup`;
   }
-
-  btn.style.display = 'flex';
-  badge.textContent = count;
-  subText.textContent = `${count} session${count > 1 ? 's' : ''} awaiting makeup`;
 }
 
 function toggleMakeupsPanel() {
@@ -715,16 +742,20 @@ function toggleMakeupsPanel() {
   }
 }
 
+let selectedMakeup = null; // currently selected makeup item
+
 function renderMakeupsPanel() {
   const list = document.getElementById('makeups-panel-list');
   list.innerHTML = '';
+  document.getElementById('makeup-log-form').style.display = 'none';
+  selectedMakeup = null;
 
   if (allPendingMakeups.length === 0) {
     list.innerHTML = '<div class="makeups-empty">No pending makeups 🎉</div>';
     return;
   }
 
-  allPendingMakeups.forEach(m => {
+  allPendingMakeups.forEach((m, idx) => {
     const daysLeft = m.daysLeft !== undefined ? m.daysLeft : null;
     const flag     = m.flag || '⏳';
 
@@ -740,6 +771,8 @@ function renderMakeupsPanel() {
 
     const item = document.createElement('div');
     item.className = 'makeup-item';
+    item.id = `makeup-item-${idx}`;
+    item.style.cursor = 'pointer';
     item.innerHTML = `
       <div class="makeup-flag">${flag}</div>
       <div class="makeup-info">
@@ -748,8 +781,120 @@ function renderMakeupsPanel() {
       </div>
       <div class="makeup-days ${daysClass}">${daysLabel}</div>
     `;
+    item.onclick = () => selectMakeupItem(m, idx);
     list.appendChild(item);
   });
+}
+
+function selectMakeupItem(m, idx) {
+  // Deselect all
+  document.querySelectorAll('.makeup-item').forEach(el => {
+    el.style.borderColor = 'var(--border)';
+    el.style.background  = 'var(--white)';
+  });
+
+  // Highlight selected
+  const el = document.getElementById(`makeup-item-${idx}`);
+  if (el) {
+    el.style.borderColor = 'var(--gold-light)';
+    el.style.background  = '#fffbf4';
+  }
+
+  selectedMakeup = m;
+
+  // Show form
+  document.getElementById('makeup-form-student-label').textContent = `${m.student} · Rescheduled from ${formatDateDisplay(m.originalDate)}`;
+  document.getElementById('makeup-covered').value  = '';
+  document.getElementById('makeup-homework').value = '';
+  document.getElementById('makeup-stage-select').value = '';
+  document.getElementById('makeup-submit-btn').disabled    = false;
+  document.getElementById('makeup-submit-btn').textContent = 'Log Makeup & Generate Update ✦';
+  document.getElementById('makeup-log-form').style.display = 'block';
+
+  setTimeout(() => {
+    document.getElementById('makeup-log-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+async function submitMakeupLog() {
+  if (!selectedMakeup) return;
+
+  const covered  = document.getElementById('makeup-covered').value.trim();
+  const homework = document.getElementById('makeup-homework').value.trim();
+  const stage    = document.getElementById('makeup-stage-select').value;
+  const now      = new Date();
+  const dateStr  = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+  const btn = document.getElementById('makeup-submit-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Submitting…';
+
+  const payload = {
+    teacher:              currentTeacher.name,
+    teacherKey:           currentTeacher.key,
+    student:              selectedMakeup.student,
+    date:                 dateStr,
+    time:                 timeStr,
+    status:               'Attended',
+    covered:              covered,
+    homework:             homework,
+    stage:                stage,
+    isMakeup:             true,
+    originalRescheduleDate: selectedMakeup.originalDate ? selectedMakeup.originalDate.toString() : ''
+  };
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode:   'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body:   JSON.stringify(payload)
+    });
+  } catch(e) { /* silent */ }
+
+  const studentName = selectedMakeup.student;
+  const origDate    = formatDateDisplay(selectedMakeup.originalDate);
+
+  // Remove from local list
+  allPendingMakeups = allPendingMakeups.filter(m =>
+    !(m.student === selectedMakeup.student && m.originalDate === selectedMakeup.originalDate)
+  );
+
+  // Build WhatsApp message
+  const divider      = '━━━━━━━━━━━━━━━';
+  const formatBullets = (text) => {
+    if (!text) return '';
+    return text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
+  };
+  const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
+
+  let msg = `Hi,\nHere's an update of ${studentName}'s *makeup session* on ${dateStr} 🎹\n`;
+  if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
+  if (covered)  msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
+  if (homework) msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
+  msg += `\nRegards,\n${currentTeacher.name}`;
+  waMessage = msg;
+
+  document.getElementById('wa-preview').textContent = msg;
+  document.getElementById('wa-section').classList.add('show');
+
+  // Reset form + panel
+  selectedMakeup = null;
+  document.getElementById('makeup-log-form').style.display = 'none';
+  renderMakeupsButton();
+  renderMakeupsPanel();
+
+  // Close panel if no more makeups
+  if (allPendingMakeups.length === 0) {
+    document.getElementById('makeups-panel').classList.remove('show');
+    document.getElementById('pending-makeups-btn').classList.remove('open');
+  }
+
+  showToast(`✓ Makeup class logged for ${studentName}`);
+  setTimeout(() => {
+    document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
 }
 
 function formatDateDisplay(dateVal) {
