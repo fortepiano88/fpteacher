@@ -705,11 +705,14 @@ async function loadPendingMakeups() {
     const res    = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
     const result = await res.json();
     if (result.success) {
-      // Only show items that are still pending (not completed, not expired)
       allPendingMakeups = (result.pending || []).filter(m => m.daysLeft === undefined || m.daysLeft > 0);
-      renderMakeupsButton();
+    } else {
+      allPendingMakeups = [];
     }
-  } catch(e) { /* silent */ }
+  } catch(e) {
+    allPendingMakeups = [];
+  }
+  renderMakeupsButton();
 }
 
 function renderMakeupsButton() {
@@ -1363,6 +1366,16 @@ async function submitLog() {
     msg += `\nRemaining Classes: ${footerData.remaining}\n`;
     msg += `Rescheduled: ${footerData.rescheduled}/3\n`;
   }
+
+  // Pending makeup reminder — only for regular classes, not makeup classes
+  const pendingMakeup = allPendingMakeups.find(m => m.student === student.name && m.daysLeft > 0);
+  if (pendingMakeup) {
+    msg += `\n${divider}\n`;
+    msg += `⏰ *Pending Makeup Class*\n`;
+    msg += `${student.name} has a makeup class pending — expiring in *${pendingMakeup.daysLeft} day${pendingMakeup.daysLeft === 1 ? '' : 's'}*.\n`;
+    msg += `${divider}\n`;
+  }
+
   msg += `\nRegards,\n${currentTeacher.name}`;
   waMessage = msg;
 
