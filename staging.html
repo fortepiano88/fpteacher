@@ -1367,14 +1367,16 @@ async function submitLog() {
     msg += `Rescheduled: ${footerData.rescheduled}/3\n`;
   }
 
-  // Pending makeup reminder — only for regular classes, not makeup classes
-  const pendingMakeup = allPendingMakeups.find(m => m.student === student.name && m.daysLeft > 0);
-  if (pendingMakeup) {
-    msg += `\n${divider}\n`;
-    msg += `⏰ *Pending Makeup Class*\n`;
-    msg += `${student.name} has a makeup class pending — expiring in *${pendingMakeup.daysLeft} day${pendingMakeup.daysLeft === 1 ? '' : 's'}*.\n`;
-    msg += `${divider}\n`;
-  }
+ // Pending makeup reminder — only for regular classes, not makeup classes
+const pendingMakeups = allPendingMakeups.filter(m => m.student === student.name && m.daysLeft > 0);
+if (pendingMakeups.length > 0) {
+  msg += `\n${divider}\n`;
+  msg += `⏰ *Pending Makeup Class${pendingMakeups.length > 1 ? 'es (' + pendingMakeups.length + ')' : ''}*\n`;
+  pendingMakeups.forEach(m => {
+    msg += `- Rescheduled from ${formatDateDisplay(m.originalDate)} — expiring in *${m.daysLeft} day${m.daysLeft === 1 ? '' : 's'}*\n`;
+  });
+  msg += `${divider}\n`;
+}
 
   msg += `\nRegards,\n${currentTeacher.name}`;
   waMessage = msg;
