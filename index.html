@@ -147,7 +147,6 @@
   }
   .pause-btn:hover { border-color: var(--rust); color: var(--rust); }
 
-  /* Reschedule button on student card */
   .reschedule-btn {
     font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
     text-transform: uppercase; padding: 4px 10px; border-radius: 100px;
@@ -239,7 +238,6 @@
   .copy-btn:hover { border-color: var(--ink); background: var(--cream); }
   .copy-btn.copied { border-color: var(--sage); color: var(--sage); background: #f0faf0; }
 
-  /* Modal */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(26,20,16,0.5); z-index: 200;
@@ -281,7 +279,6 @@
   .modal-confirm:hover { background: #2d2520; }
   .modal-confirm:disabled { background: var(--muted); cursor: not-allowed; }
 
-  /* Pending Makeups Button */
   .pending-makeups-btn {
     width: 100%; background: var(--white); border: 1.5px solid var(--border);
     border-radius: 14px; padding: 14px 16px; margin-bottom: 20px;
@@ -304,7 +301,6 @@
   .pending-makeups-btn .pmb-chevron { font-size: 12px; color: var(--muted); flex-shrink: 0; transition: transform 0.2s; }
   .pending-makeups-btn.open .pmb-chevron { transform: rotate(180deg); }
 
-  /* Pending Makeups Panel */
   .makeups-panel {
     display: none; background: #fffbf4; border: 1.5px solid #e8b86d;
     border-radius: 14px; padding: 16px; margin-bottom: 20px;
@@ -331,20 +327,17 @@
   .makeup-days.expired { background: #f5f5f5; color: var(--muted); }
   .makeups-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 8px 0; }
 
-  /* Optional field hint */
   .field-optional {
     font-size: 10px; font-weight: 400; color: var(--muted);
     text-transform: none; letter-spacing: 0; margin-left: 4px;
   }
 
-  /* Read-only teacher field */
   .readonly-field {
     width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
     padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px;
     color: var(--muted); background: var(--cream); outline: none;
   }
 
-  /* Two-col grid for date+time */
   .field-row {
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
   }
@@ -404,10 +397,9 @@
 </style>
 </head>
 <body>
-
+<div class="staging-banner">Staging Environment</div>
 <div id="loading-screen">
   <div class="loading-brand">Fortepiano</div>
-  <div class="loading-sub">Loading your students…</div>
   <div class="loading-spinner"></div>
 </div>
 
@@ -508,7 +500,6 @@
     <div class="makeups-panel" id="makeups-panel">
       <div id="makeups-panel-list"><div class="makeups-empty">Loading…</div></div>
 
-      <!-- Makeup Log Form — shown when a makeup item is selected -->
       <div id="makeup-log-form" style="display:none; margin-top:14px; border-top:1.5px solid #e8b86d; padding-top:14px;">
         <div class="section-label" style="margin-bottom:10px;">Log Makeup Class — <span id="makeup-form-student-label" style="text-transform:none; letter-spacing:0; font-weight:600; color:var(--ink);"></span></div>
 
@@ -745,7 +736,7 @@ function toggleMakeupsPanel() {
   }
 }
 
-let selectedMakeup = null; // currently selected makeup item
+let selectedMakeup = null;
 
 function renderMakeupsPanel() {
   const list = document.getElementById('makeups-panel-list');
@@ -790,13 +781,11 @@ function renderMakeupsPanel() {
 }
 
 function selectMakeupItem(m, idx) {
-  // Deselect all
   document.querySelectorAll('.makeup-item').forEach(el => {
     el.style.borderColor = 'var(--border)';
     el.style.background  = 'var(--white)';
   });
 
-  // Highlight selected
   const el = document.getElementById(`makeup-item-${idx}`);
   if (el) {
     el.style.borderColor = 'var(--gold-light)';
@@ -805,7 +794,6 @@ function selectMakeupItem(m, idx) {
 
   selectedMakeup = m;
 
-  // Show form
   document.getElementById('makeup-form-student-label').textContent = `${m.student} · Rescheduled from ${formatDateDisplay(m.originalDate)}`;
   document.getElementById('makeup-covered').value  = '';
   document.getElementById('makeup-homework').value = '';
@@ -859,12 +847,10 @@ async function submitMakeupLog() {
   const studentName = selectedMakeup.student;
   const origDate    = formatDateDisplay(selectedMakeup.originalDate);
 
-  // Remove from local list
   allPendingMakeups = allPendingMakeups.filter(m =>
     !(m.student === selectedMakeup.student && m.originalDate === selectedMakeup.originalDate)
   );
 
-  // Build WhatsApp message
   const divider      = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
     if (!text) return '';
@@ -882,13 +868,11 @@ async function submitMakeupLog() {
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
 
-  // Reset form + panel
   selectedMakeup = null;
   document.getElementById('makeup-log-form').style.display = 'none';
   renderMakeupsButton();
   renderMakeupsPanel();
 
-  // Close panel if no more makeups
   if (allPendingMakeups.length === 0) {
     document.getElementById('makeups-panel').classList.remove('show');
     document.getElementById('pending-makeups-btn').classList.remove('open');
@@ -923,7 +907,8 @@ function renderStudents() {
 
     if (isPaused) {
       card.className = 'student-card on-pause';
-    } else if (submittedStatus) {
+    } else if (submittedStatus && submittedStatus !== 'Rescheduled') {
+      // ── FIX: only grey out for Attended / Absent, never for Rescheduled ──
       card.className = `student-card submitted att-done-${submittedStatus.toLowerCase()}`;
     } else {
       card.className = 'student-card';
@@ -931,7 +916,7 @@ function renderStudents() {
 
     card.id = `card-${student.id}`;
 
-    if (!isPaused && !submittedStatus) {
+    if (!isPaused && !(submittedStatus && submittedStatus !== 'Rescheduled')) {
       card.onclick = () => selectStudent(student.id);
     }
 
@@ -940,9 +925,11 @@ function renderStudents() {
     let rightSlot = '';
     if (isPaused) {
       rightSlot = `<span class="pause-badge">Paused till ${isPaused}</span>`;
-    } else if (submittedStatus) {
+    } else if (submittedStatus && submittedStatus !== 'Rescheduled') {
+      // ── FIX: only show static badge for Attended / Absent ──
       rightSlot = `<span class="submitted-badge">${submittedStatus}</span>`;
     } else {
+      // Default: show action buttons (works for both fresh cards AND rescheduled students)
       const pauseBtn = !pauseUsed
         ? `<button class="pause-btn" onclick="openPauseModal(event, '${student.id}')">Pause</button>`
         : '';
@@ -1011,7 +998,6 @@ function openRescheduleModal(event, studentId) {
     `Log a rescheduled class for ${student.name}.`;
   document.getElementById('reschedule-teacher-display').textContent = currentTeacher.name;
 
-  // Default original date to today
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('reschedule-original-date').value = today;
   document.getElementById('reschedule-original-time').value = '';
@@ -1038,7 +1024,6 @@ async function submitReschedule() {
   const makeupTime   = document.getElementById('reschedule-makeup-time').value;
   const errEl        = document.getElementById('reschedule-error');
 
-  // Validation
   if (!originalDate) {
     errEl.textContent = 'Please select the original class date.';
     errEl.classList.add('show');
@@ -1057,12 +1042,10 @@ async function submitReschedule() {
   confirmBtn.disabled    = true;
   confirmBtn.textContent = 'Submitting…';
 
-  // Format original date for display
   const origDateObj = new Date(originalDate);
   const origDateFormatted = origDateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   const origTimeFormatted = formatTime12h(originalTime);
 
-  // Format makeup info
   const makeupDateFormatted = makeupDate
     ? new Date(makeupDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
     : 'Not Decided';
@@ -1077,7 +1060,6 @@ async function submitReschedule() {
     originalTime: originalTime,
     makeupDate:   makeupDate   || '',
     makeupTime:   makeupTime   || '',
-    // Also log to Attendance sheet
     date: origDateFormatted,
     time: origTimeFormatted,
     covered:  '',
@@ -1094,10 +1076,8 @@ async function submitReschedule() {
     });
   } catch(e) { /* silent */ }
 
-  // Update local pending count
   pendingReschedulesMap[student.name] = (pendingReschedulesMap[student.name] || 0) + 1;
 
-  // Build WhatsApp message
   let msg = `Hi,\n`;
   msg += `*${student.name}'s* session on *${origDateFormatted} at ${origTimeFormatted}* is rescheduled.\n\n`;
   msg += `📅 *Makeup Class*\n`;
@@ -1118,7 +1098,6 @@ async function submitReschedule() {
   }, 100);
 }
 
-// Helper: format "14:30" → "2:30 PM"
 function formatTime12h(timeStr) {
   if (!timeStr) return '';
   const [h, m] = timeStr.split(':').map(Number);
@@ -1313,8 +1292,6 @@ async function submitLog() {
     });
   } catch(e) { /* silent */ }
 
-  // If Rescheduled via the attendance button: just log + update count, no WA message here
-  // (Teacher should use the Reschedule button on the card for the proper flow)
   if (selectedStatus === 'Rescheduled') {
     btn.disabled    = false;
     btn.textContent = 'Log Class & Generate Update ✦';
@@ -1328,7 +1305,6 @@ async function submitLog() {
     return;
   }
 
-  // Fetch term stats for Attended
   let footerData = null;
   if (selectedStatus === 'Attended') {
     try {
@@ -1367,16 +1343,15 @@ async function submitLog() {
     msg += `Rescheduled: ${footerData.rescheduled}/3\n`;
   }
 
- // Pending makeup reminder — only for regular classes, not makeup classes
-const pendingMakeups = allPendingMakeups.filter(m => m.student === student.name && m.daysLeft > 0);
-if (pendingMakeups.length > 0) {
-  msg += `\n${divider}\n`;
-  msg += `⏰ *Pending Makeup Class${pendingMakeups.length > 1 ? 'es (' + pendingMakeups.length + ')' : ''}*\n`;
-  pendingMakeups.forEach(m => {
-    msg += `- Rescheduled from ${formatDateDisplay(m.originalDate)} — expiring in *${m.daysLeft} day${m.daysLeft === 1 ? '' : 's'}*\n`;
-  });
-  msg += `${divider}\n`;
-}
+  const pendingMakeups = allPendingMakeups.filter(m => m.student === student.name && m.daysLeft > 0);
+  if (pendingMakeups.length > 0) {
+    msg += `\n${divider}\n`;
+    msg += `⏰ *Pending Makeup Class${pendingMakeups.length > 1 ? 'es (' + pendingMakeups.length + ')' : ''}*\n`;
+    pendingMakeups.forEach(m => {
+      msg += `- Rescheduled from ${formatDateDisplay(m.originalDate)} — expiring in *${m.daysLeft} day${m.daysLeft === 1 ? '' : 's'}*\n`;
+    });
+    msg += `${divider}\n`;
+  }
 
   msg += `\nRegards,\n${currentTeacher.name}`;
   waMessage = msg;
