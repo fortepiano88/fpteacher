@@ -923,8 +923,9 @@ function renderStudents() {
 
     if (isPaused) {
       card.className = 'student-card on-pause';
-    } else if (submittedStatus) {
-      card.className = `student-card submitted att-done-${submittedStatus.toLowerCase()}`;
+   // FIXED — only lock for Attended/Absent, not rescheduled
+} else if (submittedStatus && submittedStatus !== 'Rescheduled') {
+  card.className = `student-card submitted att-done-${submittedStatus.toLowerCase()}`;
     } else {
       card.className = 'student-card';
     }
