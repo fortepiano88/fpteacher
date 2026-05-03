@@ -941,8 +941,9 @@ function renderStudents() {
     let rightSlot = '';
     if (isPaused) {
       rightSlot = `<span class="pause-badge">Paused till ${isPaused}</span>`;
-    } else if (submittedStatus) {
-      rightSlot = `<span class="submitted-badge">${submittedStatus}</span>`;
+  // FIXED
+} else if (submittedStatus && submittedStatus !== 'Rescheduled') {
+  rightSlot = `<span class="submitted-badge">${submittedStatus}</span>`;
     } else {
       const pauseBtn = !pauseUsed
         ? `<button class="pause-btn" onclick="openPauseModal(event, '${student.id}')">Pause</button>`
