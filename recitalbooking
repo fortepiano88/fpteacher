@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Grand Piano Practice Booking — Fortepiano</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+  :root {
+    --ink: #1a1410;
+    --paper: #faf7f2;
+    --cream: #f2ede4;
+    --gold: #c9933a;
+    --gold-light: #e8b86d;
+    --rust: #c25c3a;
+    --sage: #5a7a5c;
+    --muted: #8a8278;
+    --border: #e0d8cc;
+    --white: #ffffff;
+    --shadow: 0 4px 24px rgba(26,20,16,0.10);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: var(--ink);
+    padding: 48px 24px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 120%, rgba(201,147,58,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 16px;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 7vw, 52px);
+    font-weight: 500;
+    color: var(--paper);
+    line-height: 1.12;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+  .hero-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 360px;
+    margin: 0 auto 28px;
+  }
+  .hero-pills {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pill {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--paper);
+    font-weight: 400;
+  }
+  .pill span { color: var(--gold-light); font-weight: 600; }
+
+  /* ── Main ── */
+  .main {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  /* ── Step indicator ── */
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 36px;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+  }
+  .step-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
+    color: var(--muted);
+    background: var(--white);
+    transition: all 0.3s;
+    position: relative;
+    z-index: 1;
+  }
+  .step.active .step-dot {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .step.done .step-dot {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: white;
+  }
+  .step-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .step.active .step-label { color: var(--ink); font-weight: 600; }
+  .step-line {
+    width: 48px; height: 1.5px;
+    background: var(--border);
+    margin-bottom: 18px;
+    flex-shrink: 0;
+  }
+  .step-line.done { background: var(--gold); }
+
+  /* ── Card ── */
+  .card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px;
+    margin-bottom: 16px;
+    display: none;
+    animation: fadeUp 0.3s ease;
+  }
+  .card.active { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .card-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  /* ── Select ── */
+  .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+  select {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--paper);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a8278' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    cursor: pointer;
+    transition: border-color 0.18s;
+  }
+  select:focus { border-color: var(--gold); }
+  select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── Date grid ── */
+  .date-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 8px;
+    margin-top: 0;
+  }
+  .date-btn {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 8px;
+    background: var(--paper);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .date-btn:hover { border-color: var(--gold-light); background: #fffbf4; }
+  .date-btn.selected { background: var(--ink); border-color: var(--ink); }
+  .date-btn .d-day {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1;
+    display: block;
+  }
+  .date-btn .d-month {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-top: 3px;
+  }
+  .date-btn .d-dow {
+    font-size: 10px;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+  .date-btn.selected .d-day,
+  .date-btn.selected .d-month,
+  .date-btn.selected .d-dow { color: var(--paper); }
+  .date-btn.selected .d-month { color: var(--gold-light); }
+
+  /* ── Slot grid ── */
+  .slots-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+  .slot-btn {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 8px;
+    background: var(--paper);
+    cursor: pointer;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    transition: all 0.18s;
+  }
+  .slot-btn:hover { border-color: var(--gold-light); background: #fffbf4; }
+  .slot-btn.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: white;
+    font-weight: 600;
+  }
+  .slot-btn.booked {
+    background: var(--cream);
+    border-color: var(--border);
+    color: var(--muted);
+    cursor: not-allowed;
+    text-decoration: line-through;
+    opacity: 0.55;
+  }
+
+  /* ── Slot limit notice ── */
+  .slot-notice {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  .slot-notice strong { color: var(--ink); }
+
+  /* ── Summary card ── */
+  .summary-table {
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row .sr-label { color: var(--muted); }
+  .summary-row .sr-val { font-weight: 600; color: var(--ink); text-align: right; max-width: 60%; }
+  .summary-total {
+    background: var(--ink);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .summary-total .st-label {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 400;
+  }
+  .summary-total .st-amount {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--gold-light);
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    width: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary:hover { background: #2d2520; transform: translateY(-1px); box-shadow: var(--shadow); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { background: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-secondary {
+    width: 100%;
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+  }
+  .btn-secondary:hover { border-color: var(--ink); color: var(--ink); }
+
+  /* ── Error ── */
+  .error-msg {
+    font-size: 12px;
+    color: var(--rust);
+    margin-top: 8px;
+    display: none;
+    line-height: 1.4;
+  }
+  .error-msg.show { display: block; }
+
+  /* ── Loading spinner ── */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block; vertical-align: middle; margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Success screen ── */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 20px 60px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .success-screen.show { display: block; animation: fadeUp 0.4s ease; }
+  .success-icon {
+    width: 72px; height: 72px;
+    background: #f0faf0;
+    border: 2px solid var(--sage);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 24px;
+  }
+  .success-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .success-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+  .booking-summary-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 24px;
+    text-align: left;
+    margin-bottom: 20px;
+  }
+  .bsc-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .bsc-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .bsc-row:last-child { border-bottom: none; }
+  .bsc-row .bsc-lbl { color: var(--muted); }
+  .bsc-row .bsc-val { font-weight: 600; color: var(--ink); }
+
+  /* ── Loading overlay ── */
+  #initial-loader {
+    position: fixed; inset: 0;
+    background: var(--paper);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px; z-index: 999;
+  }
+  .loader-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px; font-weight: 500;
+    color: var(--ink);
+  }
+  .loader-spinner {
+    width: 28px; height: 28px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .divider { height: 1.5px; background: var(--border); margin: 20px 0; border: none; }
+
+  /* ── Slots loading ── */
+  .slots-placeholder {
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Initial loader -->
+<div id="initial-loader">
+  <div class="loader-brand">Fortepiano</div>
+  <div class="loader-spinner"></div>
+</div>
+
+<!-- Hero -->
+<div class="hero" id="hero" style="display:none;">
+  <div class="hero-eyebrow">Fortepiano · Recital Studio</div>
+  <h1 class="hero-title">Book Your<br><em>Grand Piano</em><br>Session</h1>
+  <p class="hero-sub">30-minute one-on-one practice sessions on a concert grand piano. Designed for Fortepiano students preparing for performance.</p>
+  <div class="hero-pills">
+    <div class="pill"><span>30</span> min sessions</div>
+    <div class="pill"><span>₹750</span> per slot</div>
+    <div class="pill">Max <span>2</span> slots per booking</div>
+  </div>
+</div>
+
+<!-- Main booking flow -->
+<div class="main" id="main-flow" style="display:none;">
+
+  <!-- Step indicator -->
+  <div class="steps">
+    <div class="step active" id="step-1">
+      <div class="step-dot">1</div>
+      <div class="step-label">Student</div>
+    </div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step active" id="step-2">
+      <div class="step-dot">2</div>
+      <div class="step-label">Slots</div>
+    </div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step" id="step-3">
+      <div class="step-dot">3</div>
+      <div class="step-label">Pay</div>
+    </div>
+  </div>
+
+  <!-- Card 1: Student -->
+  <div class="card active" id="card-student">
+    <div class="card-title">Who is this for?</div>
+    <div class="card-sub">Select the Fortepiano student attending this session.</div>
+    <label class="field-label">Student Name</label>
+    <select id="student-select">
+      <option value="">Loading students…</option>
+    </select>
+    <div class="error-msg" id="student-error">Please select a student to continue.</div>
+    <br>
+    <button class="btn-primary" onclick="goToSlots()" style="margin-top:20px;">
+      Choose Date & Time →
+    </button>
+  </div>
+
+  <!-- Card 2: Date & Slots -->
+  <div class="card" id="card-slots">
+    <div class="card-title">Pick your session</div>
+    <div class="card-sub">Select a date, then choose up to 2 consecutive slots.</div>
+
+    <label class="field-label" style="margin-bottom:12px;">Available Dates</label>
+    <div class="date-grid" id="date-grid">
+      <div class="slots-placeholder">Loading…</div>
+    </div>
+
+    <hr class="divider">
+
+    <div id="slots-section" style="display:none;">
+      <span class="slots-label" id="slots-section-label">Available Slots</span>
+      <div class="slot-grid" id="slot-grid"></div>
+      <div class="slot-notice" id="slot-notice"></div>
+      <div class="error-msg" id="slots-error">Please select at least one slot.</div>
+    </div>
+
+    <button class="btn-primary" id="proceed-to-pay-btn" onclick="goToSummary()" style="margin-top:24px; display:none;">
+      Review & Pay →
+    </button>
+    <button class="btn-secondary" onclick="goBack('card-student', 1)">← Change Student</button>
+  </div>
+
+  <!-- Card 3: Summary & Pay -->
+  <div class="card" id="card-summary">
+    <div class="card-title">Confirm Booking</div>
+    <div class="card-sub">Review your session details before payment.</div>
+
+    <div class="summary-table" id="summary-table">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="summary-total">
+      <div class="st-label">Total payable</div>
+      <div class="st-amount" id="summary-total-amount">₹—</div>
+    </div>
+
+    <button class="btn-primary" id="pay-btn" onclick="initiatePayment()">
+      Pay & Confirm Booking ✦
+    </button>
+    <div class="error-msg" id="pay-error" style="margin-top:10px;"></div>
+    <button class="btn-secondary" onclick="goBack('card-slots', 2)">← Change Slots</button>
+  </div>
+
+</div>
+
+<!-- Success screen -->
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">🎹</div>
+  <div class="success-title">You're all set!</div>
+  <p class="success-sub">Your grand piano session has been confirmed.<br>See you at the studio.</p>
+
+  <div class="booking-summary-card">
+    <div class="bsc-title">Booking Confirmation</div>
+    <div id="booking-confirm-rows"><!-- filled by JS --></div>
+  </div>
+
+  <p style="font-size:12px; color:var(--muted); line-height:1.6;">
+    A confirmation has been recorded. If you have any questions, contact Fortepiano via WhatsApp.
+  </p>
+</div>
+
+<script>
+// ─── CONFIG — replace with your values ───────────────────────────────────────
+const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';  // ← paste after deploying Apps Script
+const RAZORPAY_KEY_ID = 'YOUR_RAZORPAY_KEY_ID_HERE';  // ← rzp_live_XXXXXXXXXXXXXXX
+// ─────────────────────────────────────────────────────────────────────────────
+
+let allSlots = [];      // { date, slot, status } from Apps Script
+let selectedDate = null;
+let selectedSlots = []; // max 2
+let selectedStudent = '';
+let bookingResult = null;
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=init`);
+    const data = await res.json();
+
+    // Populate students
+    const sel = document.getElementById('student-select');
+    sel.innerHTML = '<option value="">— Select student —</option>';
+    (data.students || []).forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
+    });
+
+    // Store slots
+    allSlots = data.slots || [];
+    renderDateGrid();
+
+    document.getElementById('initial-loader').style.display = 'none';
+    document.getElementById('hero').style.display = 'block';
+    document.getElementById('main-flow').style.display = 'block';
+
+  } catch(err) {
+    document.getElementById('initial-loader').innerHTML = `
+      <div class="loader-brand">Fortepiano</div>
+      <p style="color:#8a8278;font-size:14px;text-align:center;max-width:280px;line-height:1.6;">
+        Unable to load booking system. Please try refreshing the page.
+      </p>
+    `;
+  }
+});
+
+// ── Date Grid ─────────────────────────────────────────────────────────────────
+
+function renderDateGrid() {
+  // Get unique dates that have at least one available slot
+  const availDates = [...new Set(
+    allSlots
+      .filter(s => s.status !== 'Booked')
+      .map(s => s.date)
+  )].sort();
+
+  const grid = document.getElementById('date-grid');
+
+  if (availDates.length === 0) {
+    grid.innerHTML = '<div class="slots-placeholder">No sessions available right now.<br>Check back soon.</div>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  availDates.forEach(dateStr => {
+    const d = new Date(dateStr + 'T00:00:00');
+    const btn = document.createElement('button');
+    btn.className = 'date-btn';
+    btn.dataset.date = dateStr;
+    btn.innerHTML = `
+      <span class="d-day">${d.getDate()}</span>
+      <span class="d-month">${d.toLocaleDateString('en-IN', { month: 'short' })}</span>
+      <span class="d-dow">${d.toLocaleDateString('en-IN', { weekday: 'short' })}</span>
+    `;
+    btn.onclick = () => selectDate(dateStr, btn);
+    grid.appendChild(btn);
+  });
+}
+
+function selectDate(dateStr, btn) {
+  document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedDate = dateStr;
+  selectedSlots = [];
+  renderSlots(dateStr);
+}
+
+// ── Slot Grid ─────────────────────────────────────────────────────────────────
+
+function renderSlots(dateStr) {
+  const slotsForDate = allSlots.filter(s => s.date === dateStr);
+  const grid = document.getElementById('slot-grid');
+  const section = document.getElementById('slots-section');
+  const d = new Date(dateStr + 'T00:00:00');
+
+  document.getElementById('slots-section-label').textContent =
+    `Slots for ${d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}`;
+
+  grid.innerHTML = '';
+  slotsForDate.forEach(s => {
+    const btn = document.createElement('button');
+    const isBooked = s.status === 'Booked';
+    btn.className = 'slot-btn' + (isBooked ? ' booked' : '');
+    btn.textContent = s.slot;
+    btn.dataset.slot = s.slot;
+    btn.disabled = isBooked;
+    if (!isBooked) btn.onclick = () => toggleSlot(s.slot, btn);
+    grid.appendChild(btn);
+  });
+
+  section.style.display = 'block';
+  updateSlotNotice();
+  document.getElementById('slots-error').classList.remove('show');
+  updateProceedBtn();
+}
+
+function toggleSlot(slot, btn) {
+  const idx = selectedSlots.indexOf(slot);
+  if (idx > -1) {
+    selectedSlots.splice(idx, 1);
+    btn.classList.remove('selected');
+  } else {
+    if (selectedSlots.length >= 2) {
+      // Deselect the first selected one
+      const first = selectedSlots.shift();
+      document.querySelectorAll('.slot-btn').forEach(b => {
+        if (b.dataset.slot === first) b.classList.remove('selected');
+      });
+    }
+    selectedSlots.push(slot);
+    btn.classList.add('selected');
+  }
+  updateSlotNotice();
+  updateProceedBtn();
+}
+
+function updateSlotNotice() {
+  const notice = document.getElementById('slot-notice');
+  const count = selectedSlots.length;
+  const amount = count * 750;
+  if (count === 0) {
+    notice.innerHTML = 'Select <strong>1 or 2</strong> slots · ₹750 per slot';
+  } else if (count === 1) {
+    notice.innerHTML = `<strong>1 slot selected</strong> · ₹750 — You can add one more`;
+  } else {
+    notice.innerHTML = `<strong>2 slots selected</strong> · ₹${amount.toLocaleString('en-IN')} total`;
+  }
+}
+
+function updateProceedBtn() {
+  const btn = document.getElementById('proceed-to-pay-btn');
+  btn.style.display = selectedSlots.length > 0 ? 'block' : 'none';
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+
+function goToSlots() {
+  selectedStudent = document.getElementById('student-select').value;
+  if (!selectedStudent) {
+    document.getElementById('student-error').classList.add('show');
+    return;
+  }
+  document.getElementById('student-error').classList.remove('show');
+  showCard('card-slots');
+  updateStep(2);
+}
+
+function goToSummary() {
+  if (selectedSlots.length === 0) {
+    document.getElementById('slots-error').classList.add('show');
+    return;
+  }
+  document.getElementById('slots-error').classList.remove('show');
+  buildSummary();
+  showCard('card-summary');
+  updateStep(3);
+}
+
+function goBack(cardId, stepNum) {
+  showCard(cardId);
+  updateStep(stepNum);
+}
+
+function showCard(cardId) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.getElementById(cardId).classList.add('active');
+}
+
+function updateStep(active) {
+  for (let i = 1; i <= 3; i++) {
+    const step = document.getElementById(`step-${i}`);
+    step.classList.remove('active', 'done');
+    if (i < active) step.classList.add('done');
+    else if (i === active) step.classList.add('active');
+  }
+  for (let i = 1; i <= 2; i++) {
+    const line = document.getElementById(`line-${i}`);
+    if (line) line.classList.toggle('done', i < active);
+  }
+}
+
+// ── Summary ───────────────────────────────────────────────────────────────────
+
+function buildSummary() {
+  const d = new Date(selectedDate + 'T00:00:00');
+  const dateLabel = d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const amount = selectedSlots.length * 750;
+
+  const table = document.getElementById('summary-table');
+  table.innerHTML = `
+    <div class="summary-row">
+      <span class="sr-label">Student</span>
+      <span class="sr-val">${selectedStudent}</span>
+    </div>
+    <div class="summary-row">
+      <span class="sr-label">Date</span>
+      <span class="sr-val">${dateLabel}</span>
+    </div>
+    <div class="summary-row">
+      <span class="sr-label">Slot${selectedSlots.length > 1 ? 's' : ''}</span>
+      <span class="sr-val">${selectedSlots.join(' & ')}</span>
+    </div>
+    <div class="summary-row">
+      <span class="sr-label">Duration</span>
+      <span class="sr-val">${selectedSlots.length * 30} minutes</span>
+    </div>
+  `;
+  document.getElementById('summary-total-amount').textContent = `₹${amount.toLocaleString('en-IN')}`;
+}
+
+// ── Payment ───────────────────────────────────────────────────────────────────
+
+async function initiatePayment() {
+  const btn = document.getElementById('pay-btn');
+  const errEl = document.getElementById('pay-error');
+  errEl.classList.remove('show');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Creating order…';
+
+  try {
+    // Step 1: Create Razorpay order via Apps Script
+    const orderRes = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action:   'create_order',
+        student:  selectedStudent,
+        date:     selectedDate,
+        slots:    selectedSlots,
+        amount:   selectedSlots.length * 750
+      })
+    });
+    const orderData = await orderRes.json();
+
+    if (!orderData.success) {
+      throw new Error(orderData.error || 'Could not create order. Please try again.');
+    }
+
+    btn.innerHTML = 'Pay & Confirm Booking ✦';
+    btn.disabled = false;
+
+    // Step 2: Open Razorpay Checkout
+    const options = {
+      key:         RAZORPAY_KEY_ID,
+      amount:      orderData.amount,       // in paise, from server
+      currency:    'INR',
+      name:        'Fortepiano',
+      description: `Grand Piano Session — ${selectedStudent}`,
+      order_id:    orderData.orderId,
+      prefill: {
+        name: selectedStudent
+      },
+      theme: { color: '#1a1410' },
+      handler: async (response) => {
+        // Step 3: Verify payment + confirm booking
+        await confirmBooking(response, orderData.orderId);
+      },
+      modal: {
+        ondismiss: () => {
+          btn.disabled = false;
+          btn.innerHTML = 'Pay & Confirm Booking ✦';
+        }
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+
+  } catch(err) {
+    btn.disabled = false;
+    btn.innerHTML = 'Pay & Confirm Booking ✦';
+    errEl.textContent = err.message || 'Something went wrong. Please try again.';
+    errEl.classList.add('show');
+  }
+}
+
+async function confirmBooking(paymentResponse, orderId) {
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Confirming…';
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action:             'confirm_booking',
+        student:            selectedStudent,
+        date:               selectedDate,
+        slots:              selectedSlots,
+        amount:             selectedSlots.length * 750,
+        razorpay_order_id:  paymentResponse.razorpay_order_id,
+        razorpay_payment_id: paymentResponse.razorpay_payment_id,
+        razorpay_signature: paymentResponse.razorpay_signature,
+        orderId:            orderId
+      })
+    });
+
+    const result = await res.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Booking confirmation failed. Contact Fortepiano.');
+    }
+
+    showSuccess(paymentResponse.razorpay_payment_id);
+
+  } catch(err) {
+    const errEl = document.getElementById('pay-error');
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+    btn.disabled = false;
+    btn.innerHTML = 'Pay & Confirm Booking ✦';
+  }
+}
+
+// ── Success Screen ────────────────────────────────────────────────────────────
+
+function showSuccess(paymentId) {
+  document.getElementById('hero').style.display = 'none';
+  document.getElementById('main-flow').style.display = 'none';
+
+  const d = new Date(selectedDate + 'T00:00:00');
+  const dateLabel = d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  const rows = document.getElementById('booking-confirm-rows');
+  rows.innerHTML = `
+    <div class="bsc-row"><span class="bsc-lbl">Student</span><span class="bsc-val">${selectedStudent}</span></div>
+    <div class="bsc-row"><span class="bsc-lbl">Date</span><span class="bsc-val">${dateLabel}</span></div>
+    <div class="bsc-row"><span class="bsc-lbl">Slot${selectedSlots.length > 1 ? 's' : ''}</span><span class="bsc-val">${selectedSlots.join(' & ')}</span></div>
+    <div class="bsc-row"><span class="bsc-lbl">Duration</span><span class="bsc-val">${selectedSlots.length * 30} minutes</span></div>
+    <div class="bsc-row"><span class="bsc-lbl">Amount Paid</span><span class="bsc-val">₹${(selectedSlots.length * 750).toLocaleString('en-IN')}</span></div>
+    <div class="bsc-row"><span class="bsc-lbl">Payment ID</span><span class="bsc-val" style="font-size:11px;font-family:monospace;">${paymentId}</span></div>
+  `;
+
+  document.getElementById('success-screen').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
