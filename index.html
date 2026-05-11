@@ -862,7 +862,7 @@ async function submitMakeupLog() {
   if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
   if (covered)  msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
   if (homework) msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
-  msg += `\nRegards,\n${currentTeacher.name}`;
+  msg += `\nRegards ,\n${currentTeacher.name}`;
   waMessage = msg;
 
   document.getElementById('wa-preview').textContent = msg;
