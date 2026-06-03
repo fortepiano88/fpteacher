@@ -825,18 +825,15 @@ function selectMakeupItem(m, idx) {
 
 async function submitMakeupLog() {
   if (!selectedMakeup) return;
-
   const covered  = document.getElementById('makeup-covered').value.trim();
   const homework = document.getElementById('makeup-homework').value.trim();
   const stage    = document.getElementById('makeup-stage-select').value;
   const now      = new Date();
   const dateStr  = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-
   const btn = document.getElementById('makeup-submit-btn');
   btn.disabled    = true;
   btn.textContent = 'Submitting…';
-
   const payload = {
     teacher:                currentTeacher.name,
     teacherKey:             currentTeacher.key,
@@ -850,7 +847,6 @@ async function submitMakeupLog() {
     isMakeup:               true,
     originalRescheduleDate: selectedMakeup.originalDate ? selectedMakeup.originalDate.toString() : ''
   };
-
   let result;
   try {
     result = await postData(payload);
@@ -860,48 +856,44 @@ async function submitMakeupLog() {
     showToast('Could not save — please try again', true);
     return;
   }
-
   if (!result || !result.success) {
     btn.disabled    = false;
     btn.textContent = 'Log Makeup & Generate Update ✦';
     showToast('Save failed: ' + (result && result.error ? result.error : 'unknown error'), true);
     return;
   }
-
   // ── Only generate WA message after confirmed success ──
   const studentName = selectedMakeup.student;
-
   allPendingMakeups = allPendingMakeups.filter(m =>
     !(m.student === selectedMakeup.student && m.originalDate === selectedMakeup.originalDate)
   );
-
   const divider = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
     if (!text) return '';
     return text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
   };
   const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
-
   let msg = `Hi,\nHere's an update of ${studentName}'s *makeup session* on ${dateStr} 🎹\n`;
   if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
   if (covered)  msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
   if (homework) msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
+  // ── NEW: append remaining classes if returned from backend ──
+  if (result.showFooter) {
+    msg += `\nRemaining Classes: ${result.remainingClasses}\n`;
+    msg += `Rescheduled: ${result.rescheduledCount}/3\n`;
+  }
   msg += `\nRegards ,\n${currentTeacher.name}`;
   waMessage = msg;
-
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
-
   selectedMakeup = null;
   document.getElementById('makeup-log-form').style.display = 'none';
   renderMakeupsButton();
   renderMakeupsPanel();
-
   if (allPendingMakeups.length === 0) {
     document.getElementById('makeups-panel').classList.remove('show');
     document.getElementById('pending-makeups-btn').classList.remove('open');
   }
-
   showToast(`✓ Makeup class logged for ${studentName}`);
   setTimeout(() => {
     document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
