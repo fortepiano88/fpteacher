@@ -351,6 +351,7 @@
     z-index: 999; white-space: nowrap;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--rust); }
 
   .error-msg { color: var(--rust); font-size: 12px; margin-top: 6px; display: none; }
   .error-msg.show { display: block; }
@@ -397,10 +398,9 @@
 </style>
 </head>
 <body>
-<div class="staging-banner">Staging Environment</div>
+
 <div id="loading-screen">
   <div class="loading-brand">Fortepiano</div>
-  <div class="loading-sub">Loading your students…</div>
   <div class="loading-spinner"></div>
 </div>
 
@@ -522,7 +522,7 @@
         </div>
 
         <button class="submit-btn" id="makeup-submit-btn" onclick="submitMakeupLog()">
-          Log Makeup & Generate Update ✦
+          Log Makeup &amp; Generate Update ✦
         </button>
       </div>
     </div>
@@ -562,7 +562,7 @@
       </div>
 
       <button class="submit-btn" id="submit-btn" onclick="submitLog()">
-        Log Class & Generate Update ✦
+        Log Class &amp; Generate Update ✦
       </button>
     </div>
 
@@ -590,7 +590,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbweX7KPBX2760Tw7OZFnOJneXbOFBh6uc1u6j_-6UvR2VFew5EIdl-GuDHLJDHfL345Pg/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4GZbhz7VmpfEKWTlvYS2CXtQlUpZl9UWKtDwsAyIKJCu8xt_zImix_tfKn30XrQWQhg/exec';
 
 let currentTeacher = null;
 let selectedStudentId = null;
@@ -602,6 +602,18 @@ let pendingReschedulesMap = {};
 let pauseTargetStudentId = null;
 let rescheduleTargetStudentId = null;
 let waMessage = '';
+
+// ─── postData ─────────────────────────────────────────────────────────────────
+// Sends the payload as FormData so the browser does NOT strip Content-Type via
+// no-cors, and we can read the real response back.
+// Apps Script receives the JSON string in e.parameter.data.
+
+async function postData(payload) {
+  const fd = new FormData();
+  fd.append('data', JSON.stringify(payload));
+  const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: fd });
+  return res.json();
+}
 
 // ─── Init ────────────────────────────────────────────────────────────────────
 
@@ -808,6 +820,8 @@ function selectMakeupItem(m, idx) {
   }, 100);
 }
 
+// ─── Submit Makeup Log ────────────────────────────────────────────────────────
+
 async function submitMakeupLog() {
   if (!selectedMakeup) return;
 
@@ -823,36 +837,44 @@ async function submitMakeupLog() {
   btn.textContent = 'Submitting…';
 
   const payload = {
-    teacher:              currentTeacher.name,
-    teacherKey:           currentTeacher.key,
-    student:              selectedMakeup.student,
-    date:                 dateStr,
-    time:                 timeStr,
-    status:               'Attended',
-    covered:              covered,
-    homework:             homework,
-    stage:                stage,
-    isMakeup:             true,
+    teacher:                currentTeacher.name,
+    teacherKey:             currentTeacher.key,
+    student:                selectedMakeup.student,
+    date:                   dateStr,
+    time:                   timeStr,
+    status:                 'Attended',
+    covered:                covered,
+    homework:               homework,
+    stage:                  stage,
+    isMakeup:               true,
     originalRescheduleDate: selectedMakeup.originalDate ? selectedMakeup.originalDate.toString() : ''
   };
 
+  let result;
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode:   'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body:   JSON.stringify(payload)
-    });
-  } catch(e) { /* silent */ }
+    result = await postData(payload);
+  } catch(e) {
+    btn.disabled    = false;
+    btn.textContent = 'Log Makeup & Generate Update ✦';
+    showToast('Could not save — please try again', true);
+    return;
+  }
 
+  if (!result || !result.success) {
+    btn.disabled    = false;
+    btn.textContent = 'Log Makeup & Generate Update ✦';
+    showToast('Save failed: ' + (result && result.error ? result.error : 'unknown error'), true);
+    return;
+  }
+
+  // ── Only generate WA message after confirmed success ──
   const studentName = selectedMakeup.student;
-  const origDate    = formatDateDisplay(selectedMakeup.originalDate);
 
   allPendingMakeups = allPendingMakeups.filter(m =>
     !(m.student === selectedMakeup.student && m.originalDate === selectedMakeup.originalDate)
   );
 
-  const divider      = '━━━━━━━━━━━━━━━';
+  const divider = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
     if (!text) return '';
     return text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
@@ -863,7 +885,7 @@ async function submitMakeupLog() {
   if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
   if (covered)  msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
   if (homework) msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
-  msg += `\nRegards,\n${currentTeacher.name}`;
+  msg += `\nRegards ,\n${currentTeacher.name}`;
   waMessage = msg;
 
   document.getElementById('wa-preview').textContent = msg;
@@ -902,14 +924,12 @@ function renderStudents() {
     const submittedStatus = submittedToday[student.id];
     const isPaused    = pausedStudents[student.name];
     const pauseUsed   = pauseUsedStudents[student.name];
-    const pendingCount = pendingReschedulesMap[student.name] || 0;
 
     const card = document.createElement('div');
 
     if (isPaused) {
       card.className = 'student-card on-pause';
     } else if (submittedStatus && submittedStatus !== 'Rescheduled') {
-      // ── FIX: only grey out for Attended / Absent, never for Rescheduled ──
       card.className = `student-card submitted att-done-${submittedStatus.toLowerCase()}`;
     } else {
       card.className = 'student-card';
@@ -921,16 +941,12 @@ function renderStudents() {
       card.onclick = () => selectStudent(student.id);
     }
 
-    const subLabel = '';
-
     let rightSlot = '';
     if (isPaused) {
       rightSlot = `<span class="pause-badge">Paused till ${isPaused}</span>`;
     } else if (submittedStatus && submittedStatus !== 'Rescheduled') {
-      // ── FIX: only show static badge for Attended / Absent ──
       rightSlot = `<span class="submitted-badge">${submittedStatus}</span>`;
     } else {
-      // Default: show action buttons (works for both fresh cards AND rescheduled students)
       const pauseBtn = !pauseUsed
         ? `<button class="pause-btn" onclick="openPauseModal(event, '${student.id}')">Pause</button>`
         : '';
@@ -945,7 +961,6 @@ function renderStudents() {
       <div class="student-avatar">${initials}</div>
       <div class="student-info">
         <div class="student-name">${student.name}</div>
-        ${subLabel}
       </div>
       ${rightSlot}
     `;
@@ -1018,6 +1033,8 @@ function closeRescheduleModal() {
   rescheduleTargetStudentId = null;
 }
 
+// ─── Submit Reschedule ────────────────────────────────────────────────────────
+
 async function submitReschedule() {
   const originalDate = document.getElementById('reschedule-original-date').value;
   const originalTime = document.getElementById('reschedule-original-time').value;
@@ -1043,7 +1060,7 @@ async function submitReschedule() {
   confirmBtn.disabled    = true;
   confirmBtn.textContent = 'Submitting…';
 
-  const origDateObj = new Date(originalDate);
+  const origDateObj       = new Date(originalDate);
   const origDateFormatted = origDateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   const origTimeFormatted = formatTime12h(originalTime);
 
@@ -1061,22 +1078,33 @@ async function submitReschedule() {
     originalTime: originalTime,
     makeupDate:   makeupDate   || '',
     makeupTime:   makeupTime   || '',
-    date: origDateFormatted,
-    time: origTimeFormatted,
-    covered:  '',
-    homework: '',
-    stage:    ''
+    date:         origDateFormatted,
+    time:         origTimeFormatted,
+    covered:      '',
+    homework:     '',
+    stage:        ''
   };
 
+  let result;
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-  } catch(e) { /* silent */ }
+    result = await postData(payload);
+  } catch(e) {
+    confirmBtn.disabled    = false;
+    confirmBtn.textContent = 'Submit ✦';
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.classList.add('show');
+    return;
+  }
 
+  if (!result || !result.success) {
+    confirmBtn.disabled    = false;
+    confirmBtn.textContent = 'Submit ✦';
+    errEl.textContent = 'Save failed: ' + (result && result.error ? result.error : 'unknown error');
+    errEl.classList.add('show');
+    return;
+  }
+
+  // ── Only generate WA message after confirmed success ──
   pendingReschedulesMap[student.name] = (pendingReschedulesMap[student.name] || 0) + 1;
 
   let msg = `Hi,\n`;
@@ -1199,6 +1227,7 @@ async function submitPause() {
   confirmBtn.disabled    = true;
   confirmBtn.textContent = 'Saving…';
 
+  // Pause uses a GET request (as before — no change needed here, it already reads the response)
   try {
     const params = new URLSearchParams({
       action:     'pause',
@@ -1211,13 +1240,13 @@ async function submitPause() {
     const result = await res.json();
 
     if (result.success) {
-      const endDate = new Date(endVal);
-      pausedStudents[student.name]    = endDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-      pauseUsedStudents[student.name] = true;
-
+      const endDate        = new Date(endVal);
       const startDateObj   = new Date(startVal);
       const startFormatted = startDateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
       const endFormatted   = endDate.toLocaleDateString('en-IN',     { day: 'numeric', month: 'short', year: 'numeric' });
+
+      pausedStudents[student.name]    = endFormatted;
+      pauseUsedStudents[student.name] = true;
 
       let msg = `*Important Update ❗️*\n\nHello,\n\n${student.name}'s piano classes are paused from *${startFormatted} to ${endFormatted}*.\n\nPlease note that no more pauses are available this year.`;
       waMessage = msg;
@@ -1233,7 +1262,7 @@ async function submitPause() {
       renderStudents();
       document.getElementById('log-form').style.display = 'none';
       selectedStudentId = null;
-      showToast(`⏸ ${student.name} paused till ${pausedStudents[student.name]}`);
+      showToast(`⏸ ${student.name} paused till ${endFormatted}`);
     } else {
       errEl.textContent = result.error || 'Something went wrong. Please try again.';
       errEl.classList.add('show');
@@ -1270,28 +1299,38 @@ async function submitLog() {
   btn.textContent = 'Submitting…';
 
   const payload = {
-    teacher:   currentTeacher.name,
+    teacher:    currentTeacher.name,
     teacherKey: currentTeacher.key,
-    student:   student.name,
-    date:      dateStr,
-    time:      timeStr,
-    status:    selectedStatus,
-    covered:   covered,
-    homework:  homework,
-    stage:     stage
+    student:    student.name,
+    date:       dateStr,
+    time:       timeStr,
+    status:     selectedStatus,
+    covered:    covered,
+    homework:   homework,
+    stage:      stage
   };
 
   const submittedStudentName = student.name;
   const submittedStatus2     = selectedStatus;
 
+  let result;
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-  } catch(e) { /* silent */ }
+    result = await postData(payload);
+  } catch(e) {
+    btn.disabled    = false;
+    btn.textContent = 'Log Class & Generate Update ✦';
+    showToast('Could not save — please try again', true);
+    return;
+  }
+
+  if (!result || !result.success) {
+    btn.disabled    = false;
+    btn.textContent = 'Log Class & Generate Update ✦';
+    showToast('Save failed: ' + (result && result.error ? result.error : 'unknown error'), true);
+    return;
+  }
+
+  // ── Only generate WA message after confirmed success ──
 
   if (selectedStatus === 'Rescheduled') {
     btn.disabled    = false;
@@ -1306,23 +1345,17 @@ async function submitLog() {
     return;
   }
 
+  // Use term stats returned from the server response (already fetched server-side for Attended)
   let footerData = null;
-  if (selectedStatus === 'Attended') {
-    try {
-      const params = new URLSearchParams({ action: 'termstats', student: student.name });
-      const res    = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
-      const result = await res.json();
-      if (result.success) {
-        footerData = { remaining: result.remainingClasses, rescheduled: result.rescheduledCount };
-      }
-    } catch(e) { /* no footer */ }
+  if (result.showFooter) {
+    footerData = { remaining: result.remainingClasses, rescheduled: result.rescheduledCount };
   }
 
   if (selectedStatus === 'Attended' || selectedStatus === 'Absent') {
     submittedToday[selectedStudentId] = selectedStatus;
   }
 
-  const divider      = '━━━━━━━━━━━━━━━';
+  const divider = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
     if (!text) return '';
     return text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
@@ -1392,11 +1425,12 @@ function copyMessage() {
   });
 }
 
-function showToast(msg) {
+function showToast(msg, isError) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
+  toast.className = 'toast' + (isError ? ' error' : '');
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
+  setTimeout(() => toast.classList.remove('show'), 3500);
 }
 </script>
 </body>
