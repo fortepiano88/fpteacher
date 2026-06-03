@@ -1308,6 +1308,7 @@ async function submitLog() {
   let footerData = null;
   if (selectedStatus === 'Attended') {
     try {
+      await new Promise(resolve => setTimeout(resolve, 1500)); // wait for sheet write
       const params = new URLSearchParams({ action: 'termstats', student: student.name });
       const res    = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
       const result = await res.json();
