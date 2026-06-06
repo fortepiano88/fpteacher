@@ -1330,9 +1330,9 @@ async function submitLog() {
     btn.textContent = 'Log Class & Generate Update ✦';
     document.getElementById('log-form').style.display = 'none';
     document.getElementById('wa-section').classList.remove('show');
+    submittedToday[selectedStudentId] = 'Rescheduled';
     selectedStudentId = null;
     selectedStatus    = null;
-    submittedToday[selectedStudentId] = 'Rescheduled';
     pendingReschedulesMap[student.name] = (pendingReschedulesMap[student.name] || 0) + 1;
     renderStudents();
     showToast(`✓ ${submittedStudentName} logged as rescheduled`);
