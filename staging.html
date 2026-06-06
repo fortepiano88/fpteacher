@@ -1332,13 +1332,14 @@ async function submitLog() {
     document.getElementById('wa-section').classList.remove('show');
     selectedStudentId = null;
     selectedStatus    = null;
+    submittedToday[selectedStudentId] = 'Rescheduled';
     pendingReschedulesMap[student.name] = (pendingReschedulesMap[student.name] || 0) + 1;
     renderStudents();
     showToast(`✓ ${submittedStudentName} logged as rescheduled`);
     return;
   }
 
-  // Use term stats returned from the server response (already fetched server-side for Attended)
+  // Use term stats returned from the server response
   let footerData = null;
   if (result.showFooter) {
     footerData = { remaining: result.remainingClasses, rescheduled: result.rescheduledCount };
@@ -1395,27 +1396,22 @@ async function submitLog() {
   renderStudents();
   showToast(`✓ ${submittedStudentName} logged as ${submittedStatus2.toLowerCase()}`);
   document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
 
-// ─── WhatsApp / Copy ──────────────────────────────────────────────────────────
-
-function openWhatsApp() {
-  window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
-}
-
-function copyMessage() {
-  if (!waMessage) return;
-  navigator.clipboard.writeText(waMessage).then(() => {
-    const btn = document.getElementById('copy-btn');
-    btn.classList.add('copied');
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
-    setTimeout(() => {
-      btn.classList.remove('copied');
-      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Message`;
-    }, 2500);
-  }).catch(() => {
-    showToast('Could not copy — try manually selecting the text');
-  });
+  // ── Refresh remaining classes count after Sheets commits the row ──
+  if (submittedStatus2 === 'Attended') {
+    setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ action: 'termstats', student: submittedStudentName });
+        const freshRes = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+        const freshResult = await freshRes.json();
+        if (freshResult.success) {
+          const freshFooter = `\nRemaining Classes: ${freshResult.remainingClasses}\nRescheduled: ${freshResult.rescheduledCount}/3\n`;
+          waMessage = waMessage.replace(/\nRemaining Classes:.*\nRescheduled:.*\/3\n/s, freshFooter);
+          document.getElementById('wa-preview').textContent = waMessage;
+        }
+      } catch(e) { /* silent — message already shown */ }
+    }, 2000);
+  }
 }
 
 function showToast(msg, isError) {
