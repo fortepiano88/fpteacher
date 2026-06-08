@@ -402,7 +402,7 @@
 <div id="loading-screen">
   <div class="loading-brand">Fortepiano</div>
   <div class="loading-spinner"></div>
-  <div class="staging-banner">⚠ Staging — brooooo0009999</div>
+  <div class="staging-banner">⚠ Staging — baaadddd</div>
 </div>
 
 <div id="not-found">
@@ -830,6 +830,7 @@ async function submitMakeupLog() {
   const stage    = document.getElementById('makeup-stage-select').value;
   const now      = new Date();
   const dateStr = now.toISOString().split('T')[0]; // "2026-06-07"
+const dateDisplay = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
   const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
   const btn = document.getElementById('makeup-submit-btn');
   btn.disabled    = true;
@@ -838,7 +839,7 @@ async function submitMakeupLog() {
     teacher:                currentTeacher.name,
     teacherKey:             currentTeacher.key,
     student:                selectedMakeup.student,
-    date:                   isoDate,
+    date:                   dateStr,
     time:                   timeStr,
     status:                 'Attended',
     covered:                covered,
@@ -873,7 +874,7 @@ async function submitMakeupLog() {
     return text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
   };
   const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
-  let msg = `Hi,\nHere's an update of ${studentName}'s *makeup session* on ${dateStr} 🎹\n`;
+  let msg = `Hi,\nHere's an update of ${studentName}'s *makeup session* on ${dateDisplay} 🎹\n`;
   if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
   if (covered)  msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
   if (homework) msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
@@ -1295,7 +1296,7 @@ async function submitLog() {
     teacher:    currentTeacher.name,
     teacherKey: currentTeacher.key,
     student:    student.name,
-    date:       isoDate,
+    date:       dateStr,
     time:       timeStr,
     status:     selectedStatus,
     covered:    covered,
@@ -1358,7 +1359,7 @@ async function submitLog() {
   const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
 
   let msg = 'Hi,\n';
-  msg += `Here's an update of ${student.name}'s session on ${dateStr} 🎹\n`;
+  msg += `Here's an update of ${student.name}'s session on ${dateDisplay} 🎹\n`;
   if (stageDisplay) msg += `\n 📌Current Stage: ${stageDisplay}\n`;
   if (covered) {
     msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
@@ -1434,12 +1435,6 @@ function copyMessage() {
   });
 }
 
-function showToast(msg) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
 function showToast(msg, isError) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
