@@ -402,7 +402,7 @@
 <div id="loading-screen">
   <div class="loading-brand">Fortepiano</div>
   <div class="loading-spinner"></div>
-  <div class="staging-banner">⚠ Staging — baaadddd</div>
+  <div class="staging-banner">⚠ Staging — fixx</div>
 </div>
 
 <div id="not-found">
@@ -1285,9 +1285,9 @@ async function submitLog() {
   const homework = document.getElementById('homework-note').value.trim();
   const stage    = document.getElementById('stage-select').value;
   const now      = new Date();
- const dateStr = now.toISOString().split('T')[0]; // "2026-06-07"
-  const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-
+const dateStr = now.toISOString().split('T')[0];
+const dateDisplay = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
   const btn = document.getElementById('submit-btn');
   btn.disabled    = true;
   btn.textContent = 'Submitting…';
