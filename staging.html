@@ -829,7 +829,7 @@ async function submitMakeupLog() {
   const homework = document.getElementById('makeup-homework').value.trim();
   const stage    = document.getElementById('makeup-stage-select').value;
   const now      = new Date();
-  const dateStr  = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const dateStr = now.toISOString().split('T')[0]; // "2026-06-07"
   const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
   const btn = document.getElementById('makeup-submit-btn');
   btn.disabled    = true;
@@ -838,7 +838,7 @@ async function submitMakeupLog() {
     teacher:                currentTeacher.name,
     teacherKey:             currentTeacher.key,
     student:                selectedMakeup.student,
-    date:                   dateStr,
+    date:                   isoDate,
     time:                   timeStr,
     status:                 'Attended',
     covered:                covered,
@@ -1284,7 +1284,7 @@ async function submitLog() {
   const homework = document.getElementById('homework-note').value.trim();
   const stage    = document.getElementById('stage-select').value;
   const now      = new Date();
-  const dateStr  = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+ const dateStr = now.toISOString().split('T')[0]; // "2026-06-07"
   const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
   const btn = document.getElementById('submit-btn');
@@ -1295,7 +1295,7 @@ async function submitLog() {
     teacher:    currentTeacher.name,
     teacherKey: currentTeacher.key,
     student:    student.name,
-    date:       dateStr,
+    date:       isoDate,
     time:       timeStr,
     status:     selectedStatus,
     covered:    covered,
