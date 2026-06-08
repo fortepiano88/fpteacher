@@ -1413,7 +1413,33 @@ async function submitLog() {
     }, 2000);
   }
 }
+// ─── WhatsApp / Copy ──────────────────────────────────────────────────────────
 
+function openWhatsApp() {
+  window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
+}
+
+function copyMessage() {
+  if (!waMessage) return;
+  navigator.clipboard.writeText(waMessage).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Message`;
+    }, 2500);
+  }).catch(() => {
+    showToast('Could not copy — try manually selecting the text');
+  });
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
 function showToast(msg, isError) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
