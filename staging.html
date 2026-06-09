@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fortepiano — Teacher App (Staging)</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
     --ink: #1a1410;
@@ -395,6 +396,21 @@
     cursor: pointer; transition: border-color 0.18s;
   }
   select:focus { border-color: var(--gold-light); }
+
+  /* ── Earnings Charts ── */
+  .charts-card {
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 16px; padding: 18px 16px 14px; margin-bottom: 20px;
+    display: none;
+  }
+  .charts-card.show { display: block; }
+  .chart-section { margin-bottom: 18px; }
+  .chart-section:last-child { margin-bottom: 0; }
+  .chart-title {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+  }
+  .chart-wrap { position: relative; height: 120px; }
 </style>
 </head>
 <body>
@@ -402,7 +418,7 @@
 <div id="loading-screen">
   <div class="loading-brand">Fortepiano</div>
   <div class="loading-spinner"></div>
-  <div class="staging-banner">⚠ Staging — fixx</div>
+  <div class="staging-banner">⚠ Staging — uhmmm</div>
 </div>
 
 <div id="not-found">
@@ -486,6 +502,18 @@
       <div class="stat-item">
         <div class="stat-val" id="stat-monthly-earnings">—</div>
         <div class="stat-lbl">Earned This Month</div>
+      </div>
+    </div>
+
+    <!-- Charts Card -->
+    <div class="charts-card" id="charts-card">
+      <div class="chart-section">
+        <div class="chart-title">📊 Classes per Month</div>
+        <div class="chart-wrap"><canvas id="chart-classes"></canvas></div>
+      </div>
+      <div class="chart-section">
+        <div class="chart-title">💰 Monthly Earnings (₹)</div>
+        <div class="chart-wrap"><canvas id="chart-earnings"></canvas></div>
       </div>
     </div>
 
@@ -686,6 +714,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     renderStudents();
     loadPendingMakeups();
+    loadCharts();
 
   } catch(err) {
     document.getElementById('loading-screen').style.display = 'none';
@@ -696,6 +725,124 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('not-found').style.display = 'block';
   }
 });
+
+// ─── Charts ──────────────────────────────────────────────────────────────────
+
+async function loadCharts() {
+  try {
+    const params = new URLSearchParams({
+      action:  'monthlystats',
+      teacher: currentTeacher.name
+    });
+    const res    = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    const result = await res.json();
+
+    if (!result.success || !result.months || result.months.length === 0) return;
+
+    const months   = result.months;
+    const labels   = months.map(m => m.label);
+    const classes  = months.map(m => m.classes);
+    const earnings = months.map(m => m.earnings);
+
+    document.getElementById('charts-card').classList.add('show');
+
+    const sharedOptions = {
+      responsive:          true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1410',
+          titleFont:       { family: 'DM Sans', size: 11 },
+          bodyFont:        { family: 'DM Sans', size: 12, weight: '600' },
+          padding:         10,
+          cornerRadius:    8,
+          displayColors:   false
+        }
+      },
+      scales: {
+        x: {
+          grid:  { display: false },
+          ticks: { font: { family: 'DM Sans', size: 10 }, color: '#8a8278' }
+        },
+        y: {
+          grid:  { color: '#f0ebe3', lineWidth: 1 },
+          ticks: { font: { family: 'DM Sans', size: 10 }, color: '#8a8278' },
+          beginAtZero: true
+        }
+      }
+    };
+
+    // Chart 1 — Classes
+    new Chart(document.getElementById('chart-classes'), {
+      type: 'bar',
+      data: {
+        labels:   labels,
+        datasets: [{
+          data:            classes,
+          backgroundColor: 'rgba(232,184,109,0.75)',
+          borderColor:     '#e8b86d',
+          borderWidth:     1.5,
+          borderRadius:    6,
+          borderSkipped:   false
+        }]
+      },
+      options: {
+        ...sharedOptions,
+        plugins: {
+          ...sharedOptions.plugins,
+          tooltip: {
+            ...sharedOptions.plugins.tooltip,
+            callbacks: {
+              label: ctx => `${ctx.parsed.y} class${ctx.parsed.y !== 1 ? 'es' : ''}`
+            }
+          }
+        }
+      }
+    });
+
+    // Chart 2 — Earnings
+    new Chart(document.getElementById('chart-earnings'), {
+      type: 'bar',
+      data: {
+        labels:   labels,
+        datasets: [{
+          data:            earnings,
+          backgroundColor: 'rgba(90,122,92,0.65)',
+          borderColor:     '#5a7a5c',
+          borderWidth:     1.5,
+          borderRadius:    6,
+          borderSkipped:   false
+        }]
+      },
+      options: {
+        ...sharedOptions,
+        plugins: {
+          ...sharedOptions.plugins,
+          tooltip: {
+            ...sharedOptions.plugins.tooltip,
+            callbacks: {
+              label: ctx => '₹' + ctx.parsed.y.toLocaleString('en-IN')
+            }
+          }
+        },
+        scales: {
+          ...sharedOptions.scales,
+          y: {
+            ...sharedOptions.scales.y,
+            ticks: {
+              ...sharedOptions.scales.y.ticks,
+              callback: val => '₹' + val.toLocaleString('en-IN')
+            }
+          }
+        }
+      }
+    });
+
+  } catch(e) {
+    // Charts are non-critical — fail silently
+  }
+}
 
 // ─── Pending Make-Ups ─────────────────────────────────────────────────────────
 
