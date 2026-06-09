@@ -418,7 +418,7 @@
 <div id="loading-screen">
   <div class="loading-brand">Fortepiano</div>
   <div class="loading-spinner"></div>
-  <div class="staging-banner">⚠ Staging — charts under</div>
+  <div class="staging-banner">⚠ Staging — all changes done</div>
 </div>
 
 <div id="not-found">
@@ -1025,6 +1025,7 @@ const dateDisplay = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'lo
   if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
   if (covered)  msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
   if (homework) msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
+
   // ── NEW: append remaining classes if returned from backend ──
   if (result.showFooter) {
     msg += `\nRemaining Classes: ${result.remainingClasses}\n`;
@@ -1047,6 +1048,18 @@ const dateDisplay = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'lo
     document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 100);
 }
+  setTimeout(async () => {
+  try {
+    const params = new URLSearchParams({ action: 'termstats', student: studentName });
+    const freshRes = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    const freshResult = await freshRes.json();
+    if (freshResult.success) {
+      const freshFooter = `\nRemaining Classes: ${freshResult.remainingClasses}\nRescheduled: ${freshResult.rescheduledCount}/3\n`;
+      waMessage = waMessage.replace(/\nRemaining Classes:.*\nRescheduled:.*\/3\n/s, freshFooter);
+      document.getElementById('wa-preview').textContent = waMessage;
+    }
+  } catch(e) { /* silent */ }
+}, 2000);
 
 function formatDateDisplay(dateVal) {
   if (!dateVal) return '—';
