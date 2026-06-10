@@ -170,6 +170,7 @@
   .att-btn:hover { border-color: var(--gold-light); color: var(--ink); }
   .att-btn.selected-attended { background: #f0faf0; border-color: var(--sage); color: var(--sage); }
   .att-btn.selected-absent { background: #fdf4f2; border-color: var(--rust); color: var(--rust); }
+  .att-btn.selected-lmc { background: #fdf4f2; border-color: var(--rust); color: var(--rust); }
 
   .field-group { margin-bottom: 20px; }
   .field-label {
@@ -566,9 +567,9 @@
           <button class="att-btn" data-status="Attended" onclick="selectAttendance(this)">
             <span class="att-icon">✅</span>Attended
           </button>
-          <button class="att-btn" data-status="Absent" onclick="selectAttendance(this)">
-            <span class="att-icon">❌</span>Absent
-          </button>
+          <button class="att-btn" data-status="LMC" onclick="selectAttendance(this)">
+  <span class="att-icon">🚫</span>LMC
+</button>
         </div>
         <div class="error-msg" id="att-error">Please select attendance status</div>
       </div>
@@ -1516,35 +1517,37 @@ const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-d
     return text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
   };
 
-  const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
+const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
 
   let msg = 'Hi,\n';
-  msg += `Here's an update of ${student.name}'s session on ${dateDisplay} 🎹\n`;
-  if (stageDisplay) msg += `\n 📌Current Stage: ${stageDisplay}\n`;
-  if (covered) {
-    msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
+  if (submittedStatus2 === 'LMC') {
+    msg += `${student.name}'s class on ${dateDisplay} was cancelled last minute.\n`;
+  } else {
+    msg += `Here's an update of ${student.name}'s session on ${dateDisplay} 🎹\n`;
+    if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
+    if (covered) {
+      msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
+    }
+    if (homework) {
+      msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
+    }
+    const pendingMakeups = allPendingMakeups.filter(m => m.student === student.name && (m.daysLeft === undefined || m.daysLeft > 0));
+    if (pendingMakeups.length > 0) {
+      msg += `\n${divider}\n`;
+      msg += `⏰ *Pending Makeup Class${pendingMakeups.length > 1 ? 'es (' + pendingMakeups.length + ')' : ''}*\n`;
+      pendingMakeups.forEach(m => {
+        msg += `- Rescheduled from ${formatDateDisplay(m.originalDate)} — expiring in *${m.daysLeft} day${m.daysLeft === 1 ? '' : 's'}*\n`;
+      });
+      msg += `${divider}\n`;
+    }
   }
-  if (homework) {
-    msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
-  }
+
   if (footerData) {
     msg += `\nRemaining Classes: ${footerData.remaining}\n`;
     msg += `Rescheduled: ${footerData.rescheduled}/3\n`;
   }
 
-  const pendingMakeups = allPendingMakeups.filter(m => m.student === student.name && m.daysLeft > 0);
-  if (pendingMakeups.length > 0) {
-    msg += `\n${divider}\n`;
-    msg += `⏰ *Pending Makeup Class${pendingMakeups.length > 1 ? 'es (' + pendingMakeups.length + ')' : ''}*\n`;
-    pendingMakeups.forEach(m => {
-      msg += `- Rescheduled from ${formatDateDisplay(m.originalDate)} — expiring in *${m.daysLeft} day${m.daysLeft === 1 ? '' : 's'}*\n`;
-    });
-    msg += `${divider}\n`;
-  }
-
   msg += `\nRegards,\n${currentTeacher.name}`;
-  waMessage = msg;
-
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
 
