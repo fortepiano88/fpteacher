@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fortepiano — Teacher App (Staging)</title>
+<title>Fortepiano — Teacher App </title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
     --ink: #1a1410;
@@ -351,6 +352,7 @@
     z-index: 999; white-space: nowrap;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--rust); }
 
   .error-msg { color: var(--rust); font-size: 12px; margin-top: 6px; display: none; }
   .error-msg.show { display: block; }
@@ -394,6 +396,21 @@
     cursor: pointer; transition: border-color 0.18s;
   }
   select:focus { border-color: var(--gold-light); }
+
+  /* ── Earnings Charts ── */
+  .charts-card {
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 16px; padding: 18px 16px 14px; margin-bottom: 20px;
+    display: none;
+  }
+  .charts-card.show { display: block; }
+  .chart-section { margin-bottom: 18px; }
+  .chart-section:last-child { margin-bottom: 0; }
+  .chart-title {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.10em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+  }
+  .chart-wrap { position: relative; height: 120px; }
 </style>
 </head>
 <body>
@@ -521,13 +538,25 @@
         </div>
 
         <button class="submit-btn" id="makeup-submit-btn" onclick="submitMakeupLog()">
-          Log Makeup & Generate Update ✦
+          Log Makeup &amp; Generate Update ✦
         </button>
       </div>
     </div>
 
     <div class="section-label">Select Student</div>
     <div class="student-grid" id="student-grid"></div>
+
+    <!-- Charts Card -->
+    <div class="charts-card" id="charts-card">
+      <div class="chart-section">
+        <div class="chart-title">📊 Classes per Month</div>
+        <div class="chart-wrap"><canvas id="chart-classes"></canvas></div>
+      </div>
+      <div class="chart-section">
+        <div class="chart-title">💰 Monthly Earnings (₹)</div>
+        <div class="chart-wrap"><canvas id="chart-earnings"></canvas></div>
+      </div>
+    </div>
 
     <div id="log-form" style="display:none;">
       <div class="section-label" style="margin-top:4px;">Attendance</div>
@@ -561,7 +590,7 @@
       </div>
 
       <button class="submit-btn" id="submit-btn" onclick="submitLog()">
-        Log Class & Generate Update ✦
+        Log Class &amp; Generate Update ✦
       </button>
     </div>
 
@@ -601,6 +630,18 @@ let pendingReschedulesMap = {};
 let pauseTargetStudentId = null;
 let rescheduleTargetStudentId = null;
 let waMessage = '';
+
+// ─── postData ─────────────────────────────────────────────────────────────────
+// Sends the payload as FormData so the browser does NOT strip Content-Type via
+// no-cors, and we can read the real response back.
+// Apps Script receives the JSON string in e.parameter.data.
+
+async function postData(payload) {
+  const fd = new FormData();
+  fd.append('data', JSON.stringify(payload));
+  const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: fd });
+  return res.json();
+}
 
 // ─── Init ────────────────────────────────────────────────────────────────────
 
@@ -672,6 +713,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     renderStudents();
     loadPendingMakeups();
+    loadCharts();
 
   } catch(err) {
     document.getElementById('loading-screen').style.display = 'none';
@@ -682,6 +724,124 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('not-found').style.display = 'block';
   }
 });
+
+// ─── Charts ──────────────────────────────────────────────────────────────────
+
+async function loadCharts() {
+  try {
+    const params = new URLSearchParams({
+      action:  'monthlystats',
+      teacher: currentTeacher.name
+    });
+    const res    = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    const result = await res.json();
+
+    if (!result.success || !result.months || result.months.length === 0) return;
+
+    const months   = result.months;
+    const labels   = months.map(m => m.label);
+    const classes  = months.map(m => m.classes);
+    const earnings = months.map(m => m.earnings);
+
+    document.getElementById('charts-card').classList.add('show');
+
+    const sharedOptions = {
+      responsive:          true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1410',
+          titleFont:       { family: 'DM Sans', size: 11 },
+          bodyFont:        { family: 'DM Sans', size: 12, weight: '600' },
+          padding:         10,
+          cornerRadius:    8,
+          displayColors:   false
+        }
+      },
+      scales: {
+        x: {
+          grid:  { display: false },
+          ticks: { font: { family: 'DM Sans', size: 10 }, color: '#8a8278' }
+        },
+        y: {
+          grid:  { color: '#f0ebe3', lineWidth: 1 },
+          ticks: { font: { family: 'DM Sans', size: 10 }, color: '#8a8278' },
+          beginAtZero: true
+        }
+      }
+    };
+
+    // Chart 1 — Classes
+    new Chart(document.getElementById('chart-classes'), {
+      type: 'bar',
+      data: {
+        labels:   labels,
+        datasets: [{
+          data:            classes,
+          backgroundColor: 'rgba(232,184,109,0.75)',
+          borderColor:     '#e8b86d',
+          borderWidth:     1.5,
+          borderRadius:    6,
+          borderSkipped:   false
+        }]
+      },
+      options: {
+        ...sharedOptions,
+        plugins: {
+          ...sharedOptions.plugins,
+          tooltip: {
+            ...sharedOptions.plugins.tooltip,
+            callbacks: {
+              label: ctx => `${ctx.parsed.y} class${ctx.parsed.y !== 1 ? 'es' : ''}`
+            }
+          }
+        }
+      }
+    });
+
+    // Chart 2 — Earnings
+    new Chart(document.getElementById('chart-earnings'), {
+      type: 'bar',
+      data: {
+        labels:   labels,
+        datasets: [{
+          data:            earnings,
+          backgroundColor: 'rgba(90,122,92,0.65)',
+          borderColor:     '#5a7a5c',
+          borderWidth:     1.5,
+          borderRadius:    6,
+          borderSkipped:   false
+        }]
+      },
+      options: {
+        ...sharedOptions,
+        plugins: {
+          ...sharedOptions.plugins,
+          tooltip: {
+            ...sharedOptions.plugins.tooltip,
+            callbacks: {
+              label: ctx => '₹' + ctx.parsed.y.toLocaleString('en-IN')
+            }
+          }
+        },
+        scales: {
+          ...sharedOptions.scales,
+          y: {
+            ...sharedOptions.scales.y,
+            ticks: {
+              ...sharedOptions.scales.y.ticks,
+              callback: val => '₹' + val.toLocaleString('en-IN')
+            }
+          }
+        }
+      }
+    });
+
+  } catch(e) {
+    // Charts are non-critical — fail silently
+  }
+}
 
 // ─── Pending Make-Ups ─────────────────────────────────────────────────────────
 
@@ -807,82 +967,98 @@ function selectMakeupItem(m, idx) {
   }, 100);
 }
 
+// ─── Submit Makeup Log ────────────────────────────────────────────────────────
+
 async function submitMakeupLog() {
   if (!selectedMakeup) return;
-
   const covered  = document.getElementById('makeup-covered').value.trim();
   const homework = document.getElementById('makeup-homework').value.trim();
   const stage    = document.getElementById('makeup-stage-select').value;
   const now      = new Date();
-  const dateStr  = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const dateStr = now.toISOString().split('T')[0]; // "2026-06-07"
+const dateDisplay = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
   const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-
   const btn = document.getElementById('makeup-submit-btn');
   btn.disabled    = true;
   btn.textContent = 'Submitting…';
-
   const payload = {
-    teacher:              currentTeacher.name,
-    teacherKey:           currentTeacher.key,
-    student:              selectedMakeup.student,
-    date:                 dateStr,
-    time:                 timeStr,
-    status:               'Attended',
-    covered:              covered,
-    homework:             homework,
-    stage:                stage,
-    isMakeup:             true,
+    teacher:                currentTeacher.name,
+    teacherKey:             currentTeacher.key,
+    student:                selectedMakeup.student,
+    date:                   dateStr,
+    time:                   timeStr,
+    status:                 'Attended',
+    covered:                covered,
+    homework:               homework,
+    stage:                  stage,
+    isMakeup:               true,
     originalRescheduleDate: selectedMakeup.originalDate ? selectedMakeup.originalDate.toString() : ''
   };
-
+  let result;
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode:   'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body:   JSON.stringify(payload)
-    });
-  } catch(e) { /* silent */ }
-
+    result = await postData(payload);
+  } catch(e) {
+    btn.disabled    = false;
+    btn.textContent = 'Log Makeup & Generate Update ✦';
+    showToast('Could not save — please try again', true);
+    return;
+  }
+  if (!result || !result.success) {
+    btn.disabled    = false;
+    btn.textContent = 'Log Makeup & Generate Update ✦';
+    showToast('Save failed: ' + (result && result.error ? result.error : 'unknown error'), true);
+    return;
+  }
+  // ── Only generate WA message after confirmed success ──
   const studentName = selectedMakeup.student;
-  const origDate    = formatDateDisplay(selectedMakeup.originalDate);
-
   allPendingMakeups = allPendingMakeups.filter(m =>
     !(m.student === selectedMakeup.student && m.originalDate === selectedMakeup.originalDate)
   );
-
-  const divider      = '━━━━━━━━━━━━━━━';
+  const divider = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
     if (!text) return '';
     return text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
   };
   const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
-
-  let msg = `Hi,\nHere's an update of ${studentName}'s *makeup session* on ${dateStr} 🎹\n`;
+  let msg = `Hi,\nHere's an update of ${studentName}'s *makeup session* on ${dateDisplay} 🎹\n`;
   if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
   if (covered)  msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
   if (homework) msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
+
+  // ── NEW: append remaining classes if returned from backend ──
+  if (result.showFooter) {
+    msg += `\nRemaining Classes: ${result.remainingClasses}\n`;
+    msg += `Rescheduled: ${result.rescheduledCount}/3\n`;
+  }
   msg += `\nRegards ,\n${currentTeacher.name}`;
   waMessage = msg;
-
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
-
   selectedMakeup = null;
   document.getElementById('makeup-log-form').style.display = 'none';
   renderMakeupsButton();
   renderMakeupsPanel();
-
   if (allPendingMakeups.length === 0) {
     document.getElementById('makeups-panel').classList.remove('show');
     document.getElementById('pending-makeups-btn').classList.remove('open');
   }
-
   showToast(`✓ Makeup class logged for ${studentName}`);
   setTimeout(() => {
     document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 100);
 }
+  setTimeout(async () => {
+  try {
+    const params = new URLSearchParams({ action: 'termstats', student: studentName });
+    const freshRes = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    const freshResult = await freshRes.json();
+    if (freshResult.success) {
+      const freshFooter = `\nRemaining Classes: ${freshResult.remainingClasses}\nRescheduled: ${freshResult.rescheduledCount}/3\n`;
+      waMessage = waMessage.replace(/\nRemaining Classes:.*\nRescheduled:.*\/3\n/s, freshFooter);
+      document.getElementById('wa-preview').textContent = waMessage;
+    }
+  } catch(e) { /* silent */ }
+}, 2000);
 
 function formatDateDisplay(dateVal) {
   if (!dateVal) return '—';
@@ -901,14 +1077,12 @@ function renderStudents() {
     const submittedStatus = submittedToday[student.id];
     const isPaused    = pausedStudents[student.name];
     const pauseUsed   = pauseUsedStudents[student.name];
-    const pendingCount = pendingReschedulesMap[student.name] || 0;
 
     const card = document.createElement('div');
 
     if (isPaused) {
       card.className = 'student-card on-pause';
     } else if (submittedStatus && submittedStatus !== 'Rescheduled') {
-      // ── FIX: only grey out for Attended / Absent, never for Rescheduled ──
       card.className = `student-card submitted att-done-${submittedStatus.toLowerCase()}`;
     } else {
       card.className = 'student-card';
@@ -920,16 +1094,12 @@ function renderStudents() {
       card.onclick = () => selectStudent(student.id);
     }
 
-    const subLabel = '';
-
     let rightSlot = '';
     if (isPaused) {
       rightSlot = `<span class="pause-badge">Paused till ${isPaused}</span>`;
     } else if (submittedStatus && submittedStatus !== 'Rescheduled') {
-      // ── FIX: only show static badge for Attended / Absent ──
       rightSlot = `<span class="submitted-badge">${submittedStatus}</span>`;
     } else {
-      // Default: show action buttons (works for both fresh cards AND rescheduled students)
       const pauseBtn = !pauseUsed
         ? `<button class="pause-btn" onclick="openPauseModal(event, '${student.id}')">Pause</button>`
         : '';
@@ -944,7 +1114,6 @@ function renderStudents() {
       <div class="student-avatar">${initials}</div>
       <div class="student-info">
         <div class="student-name">${student.name}</div>
-        ${subLabel}
       </div>
       ${rightSlot}
     `;
@@ -1017,6 +1186,8 @@ function closeRescheduleModal() {
   rescheduleTargetStudentId = null;
 }
 
+// ─── Submit Reschedule ────────────────────────────────────────────────────────
+
 async function submitReschedule() {
   const originalDate = document.getElementById('reschedule-original-date').value;
   const originalTime = document.getElementById('reschedule-original-time').value;
@@ -1042,7 +1213,7 @@ async function submitReschedule() {
   confirmBtn.disabled    = true;
   confirmBtn.textContent = 'Submitting…';
 
-  const origDateObj = new Date(originalDate);
+  const origDateObj       = new Date(originalDate);
   const origDateFormatted = origDateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   const origTimeFormatted = formatTime12h(originalTime);
 
@@ -1060,22 +1231,33 @@ async function submitReschedule() {
     originalTime: originalTime,
     makeupDate:   makeupDate   || '',
     makeupTime:   makeupTime   || '',
-    date: origDateFormatted,
-    time: origTimeFormatted,
-    covered:  '',
-    homework: '',
-    stage:    ''
+    date:         origDateFormatted,
+    time:         origTimeFormatted,
+    covered:      '',
+    homework:     '',
+    stage:        ''
   };
 
+  let result;
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-  } catch(e) { /* silent */ }
+    result = await postData(payload);
+  } catch(e) {
+    confirmBtn.disabled    = false;
+    confirmBtn.textContent = 'Submit ✦';
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.classList.add('show');
+    return;
+  }
 
+  if (!result || !result.success) {
+    confirmBtn.disabled    = false;
+    confirmBtn.textContent = 'Submit ✦';
+    errEl.textContent = 'Save failed: ' + (result && result.error ? result.error : 'unknown error');
+    errEl.classList.add('show');
+    return;
+  }
+
+  // ── Only generate WA message after confirmed success ──
   pendingReschedulesMap[student.name] = (pendingReschedulesMap[student.name] || 0) + 1;
 
   let msg = `Hi,\n`;
@@ -1198,6 +1380,7 @@ async function submitPause() {
   confirmBtn.disabled    = true;
   confirmBtn.textContent = 'Saving…';
 
+  // Pause uses a GET request (as before — no change needed here, it already reads the response)
   try {
     const params = new URLSearchParams({
       action:     'pause',
@@ -1210,13 +1393,13 @@ async function submitPause() {
     const result = await res.json();
 
     if (result.success) {
-      const endDate = new Date(endVal);
-      pausedStudents[student.name]    = endDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-      pauseUsedStudents[student.name] = true;
-
+      const endDate        = new Date(endVal);
       const startDateObj   = new Date(startVal);
       const startFormatted = startDateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
       const endFormatted   = endDate.toLocaleDateString('en-IN',     { day: 'numeric', month: 'short', year: 'numeric' });
+
+      pausedStudents[student.name]    = endFormatted;
+      pauseUsedStudents[student.name] = true;
 
       let msg = `*Important Update ❗️*\n\nHello,\n\n${student.name}'s piano classes are paused from *${startFormatted} to ${endFormatted}*.\n\nPlease note that no more pauses are available this year.`;
       waMessage = msg;
@@ -1232,7 +1415,7 @@ async function submitPause() {
       renderStudents();
       document.getElementById('log-form').style.display = 'none';
       selectedStudentId = null;
-      showToast(`⏸ ${student.name} paused till ${pausedStudents[student.name]}`);
+      showToast(`⏸ ${student.name} paused till ${endFormatted}`);
     } else {
       errEl.textContent = result.error || 'Something went wrong. Please try again.';
       errEl.classList.add('show');
@@ -1261,42 +1444,53 @@ async function submitLog() {
   const homework = document.getElementById('homework-note').value.trim();
   const stage    = document.getElementById('stage-select').value;
   const now      = new Date();
-  const dateStr  = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-
+const dateStr = now.toISOString().split('T')[0];
+const dateDisplay = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
   const btn = document.getElementById('submit-btn');
   btn.disabled    = true;
   btn.textContent = 'Submitting…';
 
   const payload = {
-    teacher:   currentTeacher.name,
+    teacher:    currentTeacher.name,
     teacherKey: currentTeacher.key,
-    student:   student.name,
-    date:      dateStr,
-    time:      timeStr,
-    status:    selectedStatus,
-    covered:   covered,
-    homework:  homework,
-    stage:     stage
+    student:    student.name,
+    date:       dateStr,
+    time:       timeStr,
+    status:     selectedStatus,
+    covered:    covered,
+    homework:   homework,
+    stage:      stage
   };
 
   const submittedStudentName = student.name;
   const submittedStatus2     = selectedStatus;
 
+  let result;
   try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-  } catch(e) { /* silent */ }
+    result = await postData(payload);
+  } catch(e) {
+    btn.disabled    = false;
+    btn.textContent = 'Log Class & Generate Update ✦';
+    showToast('Could not save — please try again', true);
+    return;
+  }
+
+  if (!result || !result.success) {
+    btn.disabled    = false;
+    btn.textContent = 'Log Class & Generate Update ✦';
+    showToast('Save failed: ' + (result && result.error ? result.error : 'unknown error'), true);
+    return;
+  }
+
+  // ── Only generate WA message after confirmed success ──
 
   if (selectedStatus === 'Rescheduled') {
     btn.disabled    = false;
     btn.textContent = 'Log Class & Generate Update ✦';
     document.getElementById('log-form').style.display = 'none';
     document.getElementById('wa-section').classList.remove('show');
+    submittedToday[selectedStudentId] = 'Rescheduled';
     selectedStudentId = null;
     selectedStatus    = null;
     pendingReschedulesMap[student.name] = (pendingReschedulesMap[student.name] || 0) + 1;
@@ -1305,24 +1499,17 @@ async function submitLog() {
     return;
   }
 
+  // Use term stats returned from the server response
   let footerData = null;
-  if (selectedStatus === 'Attended') {
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500)); // wait for sheet write
-      const params = new URLSearchParams({ action: 'termstats', student: student.name });
-      const res    = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
-      const result = await res.json();
-      if (result.success) {
-        footerData = { remaining: result.remainingClasses, rescheduled: result.rescheduledCount };
-      }
-    } catch(e) { /* no footer */ }
+  if (result.showFooter) {
+    footerData = { remaining: result.remainingClasses, rescheduled: result.rescheduledCount };
   }
 
   if (selectedStatus === 'Attended' || selectedStatus === 'Absent') {
     submittedToday[selectedStudentId] = selectedStatus;
   }
 
-  const divider      = '━━━━━━━━━━━━━━━';
+  const divider = '━━━━━━━━━━━━━━━';
   const formatBullets = (text) => {
     if (!text) return '';
     return text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
@@ -1331,7 +1518,7 @@ async function submitLog() {
   const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
 
   let msg = 'Hi,\n';
-  msg += `Here's an update of ${student.name}'s session on ${dateStr} 🎹\n`;
+  msg += `Here's an update of ${student.name}'s session on ${dateDisplay} 🎹\n`;
   if (stageDisplay) msg += `\n 📌Current Stage: ${stageDisplay}\n`;
   if (covered) {
     msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
@@ -1369,8 +1556,23 @@ async function submitLog() {
   renderStudents();
   showToast(`✓ ${submittedStudentName} logged as ${submittedStatus2.toLowerCase()}`);
   document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
 
+  // ── Refresh remaining classes count after Sheets commits the row ──
+  if (submittedStatus2 === 'Attended') {
+    setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ action: 'termstats', student: submittedStudentName });
+        const freshRes = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+        const freshResult = await freshRes.json();
+        if (freshResult.success) {
+          const freshFooter = `\nRemaining Classes: ${freshResult.remainingClasses}\nRescheduled: ${freshResult.rescheduledCount}/3\n`;
+          waMessage = waMessage.replace(/\nRemaining Classes:.*\nRescheduled:.*\/3\n/s, freshFooter);
+          document.getElementById('wa-preview').textContent = waMessage;
+        }
+      } catch(e) { /* silent — message already shown */ }
+    }, 2000);
+  }
+}
 // ─── WhatsApp / Copy ──────────────────────────────────────────────────────────
 
 function openWhatsApp() {
@@ -1392,11 +1594,12 @@ function copyMessage() {
   });
 }
 
-function showToast(msg) {
+function showToast(msg, isError) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
+  toast.className = 'toast' + (isError ? ' error' : '');
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
+  setTimeout(() => toast.classList.remove('show'), 3500);
 }
 </script>
 </body>
