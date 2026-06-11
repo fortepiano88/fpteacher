@@ -1132,8 +1132,8 @@ function selectStudent(studentId) {
   document.getElementById('covered-note').value  = '';
   document.getElementById('homework-note').value = '';
   document.getElementById('stage-select').value  = '';
-  document.getElementById('wa-section').classList.remove('show');
   document.getElementById('fields-section').style.display = 'block';
+  document.getElementById('wa-section').classList.remove('show');
 
   document.querySelectorAll('.student-card').forEach(c => c.classList.remove('selected'));
   document.getElementById(`card-${studentId}`).classList.add('selected');
