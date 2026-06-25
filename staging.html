@@ -1044,25 +1044,26 @@ const dateDisplay = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'lo
     document.getElementById('makeups-panel').classList.remove('show');
     document.getElementById('pending-makeups-btn').classList.remove('open');
   }
-  showToast(`✓ Makeup class logged for ${studentName}`);
+ showToast(`✓ Makeup class logged for ${studentName}`);
   setTimeout(() => {
     document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 100);
+
+  if (result.showFooter) {
+    setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ action: 'termstats', student: studentName });
+        const freshRes = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+        const freshResult = await freshRes.json();
+        if (freshResult.success) {
+          const freshFooter = `\nRemaining Classes: ${freshResult.remainingClasses}\nRescheduled: ${freshResult.rescheduledCount}/3\n`;
+          waMessage = waMessage.replace(/\nRemaining Classes:.*\nRescheduled:.*\/3\n/s, freshFooter);
+          document.getElementById('wa-preview').textContent = waMessage;
+        }
+      } catch(e) { /* silent */ }
+    }, 2000);
+  }
 }
-  setTimeout(async () => {
-  try {
-    const params = new URLSearchParams({ action: 'termstats', student: studentName });
-    const freshRes = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
-    const freshResult = await freshRes.json();
-    if (freshResult.success) {
-      const freshFooter = `\nRemaining Classes: ${freshResult.remainingClasses}\nRescheduled: ${freshResult.rescheduledCount}/3\n`;
-      waMessage = waMessage.replace(/\nRemaining Classes:.*\nRescheduled:.*\/3\n/s, freshFooter);
-      document.getElementById('wa-preview').textContent = waMessage;
-    }
-  } catch(e) { /* silent */ }
-}, 2000);
-  }
-  }
 function formatDateDisplay(dateVal) {
   if (!dateVal) return '—';
   const d = new Date(dateVal);
