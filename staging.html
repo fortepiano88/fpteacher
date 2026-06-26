@@ -522,22 +522,24 @@
       <div id="makeup-log-form" style="display:none; margin-top:14px; border-top:1.5px solid #e8b86d; padding-top:14px;">
         <div class="section-label" style="margin-bottom:10px;">Log Makeup Class — <span id="makeup-form-student-label" style="text-transform:none; letter-spacing:0; font-weight:600; color:var(--ink);"></span></div>
 
+<div id="fields-section">
         <div class="select-group">
           <label class="field-label">Stage</label>
-          <select id="makeup-stage-select">
+          <select id="stage-select">
             <option value="">Select Stage</option>
           </select>
         </div>
 
         <div class="field-group">
-          <label class="field-label">What was covered</label>
-          <textarea id="makeup-covered" rows="3" placeholder="e.g. Hanon Ex. 3–4, hands-together practice…"></textarea>
+          <label class="field-label">What was covered today</label>
+          <textarea id="covered-note" rows="3" placeholder="e.g. Hanon Ex. 3–4, worked on dynamics in piece B, hands-together practice…"></textarea>
         </div>
 
         <div class="field-group">
           <label class="field-label">Homework / Practice Instructions</label>
-          <textarea id="makeup-homework" rows="3" placeholder="e.g. Practice bars 5–12 daily…"></textarea>
+          <textarea id="homework-note" rows="3" placeholder="e.g. Practice bars 5–12 of piece A, 10 mins Hanon Ex. 3 daily…"></textarea>
         </div>
+      </div>
 
         <button class="submit-btn" id="makeup-submit-btn" onclick="submitMakeupLog()">
           Log Makeup &amp; Generate Update ✦
