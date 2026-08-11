@@ -3,169 +3,336 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fortepiano — Teacher Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Fortepiano — Teacher App</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --black: #000000;
+    --ink: #1a1410;
+    --paper: #faf7f2;
+    --cream: #f2ede4;
+    --gold: #FFFFFF;
+    --gold-light: #e8b86d;
+    --rust: #c25c3a;
+    --sage: #5a7a5c;
+    --muted: #8a8278;
+    --border: #e0d8cc;
     --white: #ffffff;
-    --gray-light: #f9f9f9;
-    --gray-mid: #e0e0e0;
-    --gray-dark: #555555;
+    --shadow: 0 2px 16px rgba(26,20,16,0.10);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   body {
-    font-family: 'Inter', sans-serif; background: var(--white);
-    color: var(--black); min-height: 100vh; display: flex; flex-direction: column;
-    -webkit-font-smoothing: antialiased;
+    font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink);
+    min-height: 100vh; display: flex; flex-direction: column;
   }
 
   .header {
-    border-bottom: 2px solid var(--black); padding: 24px 20px 20px;
-    position: sticky; top: 0; z-index: 100; background: var(--white);
-    display: flex; align-items: flex-end; justify-content: space-between;
+    background: var(--ink); color: var(--paper); padding: 18px 20px 16px;
+    position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between;
   }
-  .header-brand { font-family: 'DM Serif Display', serif; font-size: 26px; font-style: italic; letter-spacing: -0.02em; }
-  .header-teacher { font-size: 12px; color: var(--gray-dark); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
-  .header-teacher span { color: var(--black); font-weight: 600; }
+  .header-brand { font-family: 'DM Serif Display', serif; font-size: 22px; letter-spacing: 0.02em; color: var(--gold-light); }
+  .header-teacher { font-size: 13px; color: var(--muted); font-weight: 400; }
+  .header-teacher span { color: var(--paper); font-weight: 500; }
 
-  .main { flex: 1; padding: 30px 20px 60px; max-width: 500px; margin: 0 auto; width: 100%; }
+  .main { flex: 1; padding: 20px 16px 40px; max-width: 480px; margin: 0 auto; width: 100%; }
 
-  .section-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 16px; border-bottom: 1px solid var(--gray-mid); padding-bottom: 8px; }
+  .date-strip { background: var(--cream); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .date-icon { font-size: 18px; }
+  .date-text { font-size: 14px; color: var(--muted); }
+  .date-text strong { color: var(--ink); font-weight: 600; }
 
-  .student-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
-  .student-card {
-    background: var(--white); border: 1px solid var(--black); border-radius: 0;
-    padding: 16px; cursor: pointer; transition: all 0.2s ease; position: relative;
-  }
-  .student-card:hover { background: var(--gray-light); }
-  .student-card.selected { background: var(--black); color: var(--white); }
-  .student-card.selected .student-name { color: var(--white); }
-  .student-card.selected .tag { border-color: var(--white); color: var(--white); }
-  .student-card.selected .metrics { color: #d0d0d0; }
-  
-  .student-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--black); margin-bottom: 8px; }
-  
-  .tag-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-  .tag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid var(--black); padding: 4px 8px; font-weight: 500; }
-  
-  .metrics { font-size: 12px; color: var(--gray-dark); display: flex; justify-content: space-between; border-top: 1px dashed var(--gray-mid); padding-top: 12px; }
-  .metric-alert { font-weight: 600; color: #d32f2f; } /* Subtle red if classes are 0 */
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; padding-left: 2px; }
 
-  #log-form { display: none; animation: fadeIn 0.4s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .student-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .student-card { background: var(--white); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: all 0.18s ease; display: flex; align-items: center; gap: 14px; }
+  .student-card:hover { border-color: var(--gold-light); }
+  .student-card.selected { border-color: var(--gold-light); background: #fffbf4; box-shadow: 0 0 0 3px rgba(201,147,58,0.12); }
+  .student-card.submitted { opacity: 0.55; pointer-events: none; }
+  .student-card.on-pause { opacity: 0.6; pointer-events: none; background: #faf7f2; }
 
-  .attendance-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 30px; }
-  .att-btn {
-    border: 1px solid var(--black); border-radius: 0; padding: 14px 8px;
-    cursor: pointer; text-align: center; background: var(--white);
-    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--black); transition: all 0.2s;
-  }
-  .att-btn.selected { background: var(--black); color: var(--white); }
+  .student-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--cream); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--ink); flex-shrink: 0; }
+  .student-info { flex: 1; min-width: 0; }
+  .student-name { font-weight: 500; font-size: 15px; color: var(--ink); }
+  .student-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-  .field-group { margin-bottom: 24px; }
-  .field-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--black); margin-bottom: 10px; display: block; }
-  
-  textarea, select {
-    width: 100%; border: 1px solid var(--black); border-radius: 0; padding: 14px;
-    font-family: 'Inter', sans-serif; font-size: 14px; color: var(--black); background: var(--white); outline: none; line-height: 1.6;
-    appearance: none;
-  }
-  textarea:focus, select:focus { box-shadow: 4px 4px 0px var(--black); }
+  .student-check { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; transition: all 0.18s; flex-shrink: 0; font-size: 12px; }
+  .student-card.selected .student-check { background: var(--gold-light); border-color: var(--gold-light); color: white; }
 
-  .submit-btn {
-    width: 100%; background: var(--black); color: var(--white); border: 2px solid var(--black); border-radius: 0; padding: 18px;
-    font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s;
-  }
-  .submit-btn:disabled { background: var(--white); color: var(--gray-mid); border-color: var(--gray-mid); cursor: not-allowed; }
-  .submit-btn:hover:not(:disabled) { background: var(--white); color: var(--black); }
+  .submitted-badge { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 100px; background: var(--cream); color: var(--muted); flex-shrink: 0; }
+  .att-done-attended .submitted-badge { background: #f0faf0; color: var(--sage); }
+  .att-done-absent .submitted-badge { background: #fdf4f2; color: var(--rust); }
+  .att-done-rescheduled .submitted-badge { background: #fdf8ef; color: #b8860b; }
+  .pause-badge { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 100px; background: #f0f4ff; color: #4a6fa5; flex-shrink: 0; }
 
-  .wa-section { display: none; background: var(--gray-light); border: 1px solid var(--black); padding: 24px; margin-top: 30px; }
+  .pause-btn, .reschedule-btn { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; background: transparent; border: 1.5px solid var(--border); color: var(--muted); cursor: pointer; flex-shrink: 0; font-family: 'DM Sans', sans-serif; transition: all 0.18s; }
+  .pause-btn:hover { border-color: var(--rust); color: var(--rust); }
+  .reschedule-btn:hover { border-color: var(--gold-light); color: #a07830; }
+
+  .attendance-section { margin-bottom: 24px; }
+  .attendance-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .att-btn { border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 8px; cursor: pointer; text-align: center; background: var(--white); transition: all 0.18s ease; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .att-btn .att-icon { font-size: 20px; }
+  .att-btn:hover { border-color: var(--gold-light); color: var(--ink); }
+  .att-btn.selected-attended { background: #f0faf0; border-color: var(--sage); color: var(--sage); }
+  .att-btn.selected-absent { background: #fdf4f2; border-color: var(--rust); color: var(--rust); }
+
+  .field-group { margin-bottom: 20px; }
+  .field-label { font-size: 11px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
+  textarea, input[type="date"], input[type="time"] { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink); background: var(--white); resize: none; outline: none; transition: border-color 0.18s; line-height: 1.5; }
+  textarea:focus, input[type="date"]:focus, input[type="time"]:focus { border-color: var(--gold-light); }
+
+  .submit-btn { width: 100%; background: var(--ink); color: var(--paper); border: none; border-radius: 14px; padding: 16px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em; margin-top: 4px; }
+  .submit-btn:hover { background: #2d2520; transform: translateY(-1px); box-shadow: var(--shadow); }
+  .submit-btn:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
+
+  .wa-section { display: none; background: var(--white); border: 1.5px solid #25D366; border-radius: 16px; padding: 20px; margin-top: 20px; animation: slideUp 0.3s ease; }
   .wa-section.show { display: block; }
-  .wa-title { font-family: 'DM Serif Display', serif; font-size: 18px; margin-bottom: 12px; }
-  .wa-preview { background: var(--white); border: 1px solid var(--gray-mid); padding: 16px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 16px; }
-  .wa-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .wa-btn { background: var(--black); color: var(--white); border: 1px solid var(--black); padding: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; }
-  .wa-btn.secondary { background: var(--white); color: var(--black); }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .wa-title { font-size: 13px; font-weight: 600; color: #1a8a3a; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .wa-preview { background: #f0fdf4; border-radius: 10px; padding: 12px; font-size: 13px; line-height: 1.6; color: var(--ink); white-space: pre-wrap; margin-bottom: 14px; border: 1px solid #c3e6cb; }
+  .wa-btn { width: 100%; background: #25D366; color: white; border: none; border-radius: 12px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .wa-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .copy-btn { border: 1.5px solid var(--border); border-radius: 12px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: var(--ink); background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
-  #loading-screen { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; flex-direction: column; z-index: 999; }
-  
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--black); color: var(--white); padding: 14px 24px; font-size: 14px; font-weight: 500; transition: transform 0.3s ease; z-index: 999; border: 1px solid var(--white); }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,20,16,0.5); z-index: 200; align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--white); border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 400px; animation: slideUp 0.25s ease; }
+  .modal-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--ink); margin-bottom: 4px; }
+  .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+  .modal-field { margin-bottom: 16px; }
+  .modal-error { font-size: 12px; color: var(--rust); margin-top: 8px; display: none; line-height: 1.4; }
+  .modal-error.show { display: block; }
+  .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
+  .modal-cancel { border: 1.5px solid var(--border); border-radius: 12px; padding: 13px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--muted); background: var(--white); cursor: pointer; }
+  .modal-confirm { border: none; border-radius: 12px; padding: 13px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: white; background: var(--ink); cursor: pointer; }
+
+  .pending-makeups-btn { width: 100%; background: var(--white); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-family: 'DM Sans', sans-serif; transition: all 0.18s ease; text-align: left; }
+  .pmb-icon { font-size: 20px; flex-shrink: 0; }
+  .pmb-text { flex: 1; }
+  .pmb-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .pmb-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .pmb-badge { background: var(--gold-light); color: white; font-size: 11px; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .makeups-panel { display: none; background: #fffbf4; border: 1.5px solid #e8b86d; border-radius: 14px; padding: 16px; margin-bottom: 20px; animation: slideUp 0.2s ease; }
+  .makeups-panel.show { display: block; }
+  .makeup-item { background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+  .makeup-flag { font-size: 18px; flex-shrink: 0; }
+  .makeup-info { flex: 1; min-width: 0; }
+  .makeup-name { font-weight: 600; font-size: 14px; color: var(--ink); }
+  .makeup-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .makeup-days { font-size: 11px; font-weight: 700; flex-shrink: 0; padding: 3px 8px; border-radius: 100px; }
+
+  .readonly-field { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--muted); background: var(--cream); outline: none; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: var(--paper); padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 500; transition: transform 0.3s ease; z-index: 999; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--rust); }
+  .error-msg { color: var(--rust); font-size: 12px; margin-top: 6px; display: none; }
+  .error-msg.show { display: block; }
+  #loading-screen { position: fixed; inset: 0; background: var(--paper); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 999; }
+  .loading-brand { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--ink); }
+  .loading-spinner { width: 28px; height: 28px; border: 2.5px solid var(--border); border-top-color: var(--gold-light); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #not-found { display: none; text-align: center; padding: 60px 24px; }
+  #not-found h2 { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 12px; color: var(--ink); }
+  #not-found p { color: var(--muted); font-size: 15px; line-height: 1.6; }
+  
+  .stats-card { background: var(--white); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px 20px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .stat-item { text-align: center; padding: 4px 8px; }
+  .stat-item:first-child { border-right: 1.5px solid var(--border); }
+  .stat-val { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--ink); line-height: 1; }
+  .stat-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+
+  select { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 11px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink); background: var(--white); outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238a8278' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer; transition: border-color 0.18s; }
+  
+  .charts-card { background: var(--white); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px 16px 14px; margin-bottom: 20px; display: none; }
+  .charts-card.show { display: block; }
+  .chart-section { margin-bottom: 18px; }
+  .chart-title { font-size: 10px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .chart-wrap { position: relative; height: 120px; }
 </style>
 </head>
 <body>
 
 <div id="loading-screen">
-  <div style="font-family:'DM Serif Display',serif; font-size:36px; font-style:italic;">Fortepiano</div>
-  <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:var(--gray-dark); margin-top:16px;">Connecting Database...</div>
+  <div class="loading-brand">Fortepiano</div>
+  <div class="loading-spinner"></div>
+</div>
+
+<div id="not-found">
+  <h2>Teacher not found</h2>
+  <p>This link doesn't match any teacher in the system.<br>Please contact Fortepiano admin.</p>
+</div>
+
+<!-- Reschedule Modal -->
+<div class="modal-overlay" id="reschedule-modal">
+  <div class="modal">
+    <div class="modal-title">Request Class Reschedule</div>
+    <div class="modal-sub" id="reschedule-modal-sub">Log a rescheduled class for this student.</div>
+
+    <div class="modal-field">
+      <label class="field-label">Original Class Date <span style="color:var(--rust)">*</span></label>
+      <input type="date" id="reschedule-original-date">
+    </div>
+    <div class="modal-field">
+      <label class="field-label">Original Class Time <span style="color:var(--rust)">*</span></label>
+      <input type="time" id="reschedule-original-time">
+    </div>
+    <div class="modal-field">
+      <label class="field-label">Makeup Class Date <span style="color:var(--muted)">(optional)</span></label>
+      <input type="date" id="reschedule-makeup-date">
+    </div>
+    <div class="modal-field">
+      <label class="field-label">Makeup Class Time <span style="color:var(--muted)">(optional)</span></label>
+      <input type="time" id="reschedule-makeup-time">
+    </div>
+    <div class="modal-field">
+      <label class="field-label">Teacher</label>
+      <div class="readonly-field" id="reschedule-teacher-display">—</div>
+    </div>
+
+    <div class="modal-error" id="reschedule-error"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeRescheduleModal()">Cancel</button>
+      <button class="modal-confirm" id="reschedule-confirm-btn" onclick="submitReschedule()">Submit ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pause Modal -->
+<div class="modal-overlay" id="pause-modal">
+  <div class="modal">
+    <div class="modal-title">Pause Classes</div>
+    <div class="modal-sub" id="pause-modal-sub">Set the pause window for this student. Maximum 31 days.</div>
+    <div class="modal-field">
+      <label class="field-label">Start Date</label>
+      <input type="date" id="pause-start" oninput="onPauseStartChange()">
+    </div>
+    <div class="modal-field">
+      <label class="field-label">End Date</label>
+      <input type="date" id="pause-end" oninput="onPauseEndChange()">
+    </div>
+    <div class="modal-error" id="pause-error"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closePauseModal()">Cancel</button>
+      <button class="modal-confirm" id="pause-confirm-btn" onclick="submitPause()">Confirm Pause</button>
+    </div>
+  </div>
 </div>
 
 <div id="app" style="display:none; flex-direction:column; min-height:100vh;">
   <div class="header">
     <div class="header-brand">Fortepiano</div>
-    <div class="header-teacher">Tutor <br><span id="teacher-display-name">—</span></div>
+    <div class="header-teacher">Teaching as <span id="teacher-display-name">—</span></div>
   </div>
 
   <div class="main">
-    <div class="section-title">Select Student</div>
-    <div class="student-grid" id="student-grid"></div>
-
-    <div id="log-form">
-      <div class="section-title">Log Session</div>
-      <div class="attendance-row">
-        <button class="att-btn" data-status="Attended" onclick="selectAttendance(this)">Attended</button>
-        <button class="att-btn" data-status="LMC" onclick="selectAttendance(this)">Late Cancel</button>
-        <button class="att-btn" data-status="Rescheduled" onclick="selectAttendance(this)">Reschedule</button>
-      </div>
-
-      <div id="fields-section">
-        <div class="field-group">
-          <label class="field-label">Class Type</label>
-          <select id="class-type">
-            <option value="Regular">Regular Term</option>
-            <option value="Summer">Summer Session</option>
-          </select>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Current Stage</label>
-          <select id="stage-note">
-            <option value="" disabled selected>Select Level...</option>
-            <option value="Foundation">Foundation</option>
-            <option value="Initial">Initial Grade</option>
-            <option value="Grade 1">Grade 1</option>
-            <option value="Grade 2">Grade 2</option>
-            <option value="Grade 3">Grade 3</option>
-            <option value="Grade 4">Grade 4</option>
-            <option value="Grade 5">Grade 5</option>
-            <option value="Grade 6">Grade 6</option>
-            <option value="Grade 7">Grade 7</option>
-            <option value="Grade 8">Grade 8</option>
-            <option value="Diploma">Diploma</option>
-          </select>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Material Covered</label>
-          <textarea id="covered-note" rows="3" placeholder="Repertoire, technique, scales..."></textarea>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Practice Notes</label>
-          <textarea id="homework-note" rows="3" placeholder="What should they focus on this week?"></textarea>
-        </div>
-      </div>
-
-      <button class="submit-btn" id="submit-btn" onclick="submitLog()">Log Class</button>
+    <div class="date-strip">
+      <span class="date-icon">📅</span>
+      <div class="date-text">Today is <strong id="today-date">—</strong></div>
     </div>
 
-    <!-- WhatsApp Section -->
+    <div class="stats-card" id="stats-card" style="display:none;">
+      <div class="stat-item">
+        <div class="stat-val" id="stat-monthly-classes">—</div>
+        <div class="stat-lbl">Classes This Month</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-val" id="stat-monthly-earnings">—</div>
+        <div class="stat-lbl">Earned This Month</div>
+      </div>
+    </div>
+
+    <button class="pending-makeups-btn" id="pending-makeups-btn" onclick="toggleMakeupsPanel()">
+      <span class="pmb-icon">🔄</span>
+      <div class="pmb-text">
+        <div class="pmb-title">Pending Make-Ups</div>
+        <div class="pmb-sub" id="pmb-sub-text">Loading…</div>
+      </div>
+      <div class="pmb-badge" id="pmb-badge" style="display:none;">0</div>
+      <span class="pmb-chevron">▼</span>
+    </button>
+
+    <div class="makeups-panel" id="makeups-panel">
+      <div id="makeups-panel-list"><div class="makeups-empty">Loading…</div></div>
+
+      <div id="makeup-log-form" style="display:none; margin-top:14px; border-top:1.5px solid #e8b86d; padding-top:14px;">
+        <div class="section-label" style="margin-bottom:10px;">Log Makeup Class — <span id="makeup-form-student-label" style="text-transform:none; letter-spacing:0; font-weight:600; color:var(--ink);"></span></div>
+        <div class="field-group">
+          <label class="field-label">Stage</label>
+          <select id="makeup-stage-select">
+            <option value="">Select Stage</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">What was covered</label>
+          <textarea id="makeup-covered" rows="3" placeholder="e.g. Hanon Ex. 3–4, hands-together practice…"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Homework / Practice Instructions</label>
+          <textarea id="makeup-homework" rows="3" placeholder="e.g. Practice bars 5–12 daily…"></textarea>
+        </div>
+        <button class="submit-btn" id="makeup-submit-btn" onclick="submitMakeupLog()">
+          Log Makeup &amp; Generate Update ✦
+        </button>
+      </div>
+    </div>
+
+    <div class="section-label">Select Student</div>
+    <div class="student-grid" id="student-grid"></div>
+
+    <div class="charts-card" id="charts-card">
+      <div class="chart-section">
+        <div class="chart-title">📊 Classes per Month</div>
+        <div class="chart-wrap"><canvas id="chart-classes"></canvas></div>
+      </div>
+      <div class="chart-section">
+        <div class="chart-title">💰 Monthly Earnings (₹)</div>
+        <div class="chart-wrap"><canvas id="chart-earnings"></canvas></div>
+      </div>
+    </div>
+
+    <div id="log-form" style="display:none;">
+      <div class="section-label" style="margin-top:4px;">Attendance</div>
+      <div class="attendance-section">
+        <div class="attendance-row" style="grid-template-columns: 1fr 1fr;">
+          <button class="att-btn" data-status="Attended" onclick="selectAttendance(this)">
+            <span class="att-icon">✅</span>Attended
+          </button>
+          <button class="att-btn" data-status="Absent" onclick="selectAttendance(this)">
+            <span class="att-icon">❌</span>Absent
+          </button>
+        </div>
+        <div class="error-msg" id="att-error">Please select attendance status</div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Stage</label>
+        <select id="stage-select">
+          <option value="">Select Stage</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">What was covered today</label>
+        <textarea id="covered-note" rows="3" placeholder="e.g. Hanon Ex. 3–4..."></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Homework / Practice Instructions</label>
+        <textarea id="homework-note" rows="3" placeholder="e.g. Practice bars 5–12..."></textarea>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="submitLog()">
+        Log Class &amp; Generate Update ✦
+      </button>
+    </div>
+
     <div class="wa-section" id="wa-section">
-      <div class="wa-title">Parent Update Generated</div>
+      <div class="wa-title">💬 Ready to send parent update</div>
       <div class="wa-preview" id="wa-preview"></div>
       <div class="wa-actions">
-        <button class="wa-btn secondary" onclick="copyMessage()">Copy Text</button>
-        <button class="wa-btn" onclick="openWhatsApp()">Send WhatsApp</button>
+        <button class="copy-btn" id="copy-btn" onclick="copyMessage()">Copy Message</button>
+        <button class="wa-btn" onclick="openWhatsApp()">WhatsApp</button>
       </div>
     </div>
   </div>
@@ -174,196 +341,570 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// --- IMPORTANT: Paste your Web App URL below ---
-const APPS_SCRIPT_URL = 'YOUR_WEB_APP_URL_HERE';
+// --- PASTE YOUR EXACT WEB APP URL BELOW ---
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVC6InAN0RmQsq1h5coBsF_cXbMSYxep0DFAhHbL5xc9PClge7PSSJprYoAa8y2zXs/exec';
 
 let currentTeacher = null;
-let assignedStudents = [];
-let selectedStudent = null;
+let selectedStudentId = null;
 let selectedStatus = null;
+let submittedToday = {};
+let pausedStudents = {};
+let pauseUsedStudents = {};
+let pendingReschedulesMap = {};
+let pauseTargetStudentId = null;
+let rescheduleTargetStudentId = null;
 let waMessage = '';
 
-window.addEventListener('DOMContentLoaded', async () => {
-  const params = new URLSearchParams(window.location.search);
-  const accessKey = params.get('key');
+async function postData(payload) {
+  const fd = new FormData();
+  fd.append('data', JSON.stringify(payload));
+  const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: fd });
+  return res.json();
+}
 
-  if (!accessKey) {
-    document.getElementById('loading-screen').innerHTML = '<div style="font-family:serif; font-size:24px;">Access Denied</div>';
+window.addEventListener('DOMContentLoaded', async () => {
+  const now = new Date();
+  document.getElementById('today-date').textContent = now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  const params = new URLSearchParams(window.location.search);
+  const teacherKey = (params.get('key') || params.get('teacher') || '').toLowerCase().trim();
+
+  if (!teacherKey) {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('not-found').style.display = 'block';
     return;
   }
 
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?key=${encodeURIComponent(accessKey)}`);
+    const res = await fetch(`${APPS_SCRIPT_URL}?key=${encodeURIComponent(teacherKey)}`);
     const data = await res.json();
+    document.getElementById('loading-screen').style.display = 'none';
 
     if (!data.success) {
-      document.getElementById('loading-screen').innerHTML = `<div style="font-family:serif; font-size:20px;">${data.error}</div>`;
+      document.getElementById('not-found').style.display = 'block';
       return;
     }
 
-    currentTeacher = data.teacher;
-    assignedStudents = data.students;
+    currentTeacher = {
+      id: data.teacherId,
+      name: data.teacherName,
+      students: data.students // Contains {id, name, subject}
+    };
+
+    pausedStudents = data.pausedStudents || {};
+    pauseUsedStudents = data.pauseUsedStudents || {};
+    pendingReschedulesMap = data.pendingReschedules || {};
 
     document.getElementById('teacher-display-name').textContent = currentTeacher.name;
-    document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
-    
+
+    if (data.monthlyClasses !== undefined) {
+      document.getElementById('stat-monthly-classes').textContent = data.monthlyClasses;
+      document.getElementById('stat-monthly-earnings').textContent = '₹' + data.monthlyEarnings.toLocaleString('en-IN');
+      document.getElementById('stats-card').style.display = 'grid';
+    }
+
+    if (data.stages && data.stages.length > 0) {
+      const stageSelect = document.getElementById('stage-select');
+      const makeupStageSelect = document.getElementById('makeup-stage-select');
+      data.stages.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.stage; opt.textContent = s.stage;
+        stageSelect.appendChild(opt);
+        makeupStageSelect.appendChild(opt.cloneNode(true));
+      });
+    }
+
+    if (data.loggedToday && data.loggedToday.length > 0) {
+      currentTeacher.students.forEach(student => {
+        if (data.loggedToday.includes(student.id)) {
+          submittedToday[student.id] = 'Done';
+        }
+      });
+    }
+
     renderStudents();
-  } catch (err) {
-    document.getElementById('loading-screen').innerHTML = 'Database Connection Error.';
+    loadPendingMakeups();
+    loadCharts();
+
+  } catch(err) {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('not-found').innerHTML = `<h2>Connection error</h2><p>Could not load your students.</p>`;
+    document.getElementById('not-found').style.display = 'block';
   }
 });
+
+async function loadCharts() {
+  try {
+    const params = new URLSearchParams({ action: 'monthlystats', teacherId: currentTeacher.id });
+    const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    const result = await res.json();
+    if (!result.success || !result.months || result.months.length === 0) return;
+
+    const months = result.months;
+    const labels = months.map(m => m.label);
+    const classes = months.map(m => m.classes);
+    const earnings = months.map(m => m.earnings);
+    document.getElementById('charts-card').classList.add('show');
+
+    const sharedOptions = {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1410', titleFont: { family: 'DM Sans', size: 11 }, bodyFont: { family: 'DM Sans', size: 12, weight: '600' }, padding: 10, cornerRadius: 8, displayColors: false } },
+      scales: { x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 10 }, color: '#8a8278' } }, y: { grid: { color: '#f0ebe3', lineWidth: 1 }, ticks: { font: { family: 'DM Sans', size: 10 }, color: '#8a8278' }, beginAtZero: true } }
+    };
+
+    new Chart(document.getElementById('chart-classes'), {
+      type: 'bar',
+      data: { labels: labels, datasets: [{ data: classes, backgroundColor: 'rgba(232,184,109,0.75)', borderColor: '#e8b86d', borderWidth: 1.5, borderRadius: 6 }] },
+      options: { ...sharedOptions, plugins: { ...sharedOptions.plugins, tooltip: { ...sharedOptions.plugins.tooltip, callbacks: { label: ctx => `${ctx.parsed.y} class${ctx.parsed.y !== 1 ? 'es' : ''}` } } } }
+    });
+
+    new Chart(document.getElementById('chart-earnings'), {
+      type: 'bar',
+      data: { labels: labels, datasets: [{ data: earnings, backgroundColor: 'rgba(90,122,92,0.65)', borderColor: '#5a7a5c', borderWidth: 1.5, borderRadius: 6 }] },
+      options: { ...sharedOptions, plugins: { ...sharedOptions.plugins, tooltip: { ...sharedOptions.plugins.tooltip, callbacks: { label: ctx => '₹' + ctx.parsed.y.toLocaleString('en-IN') } } }, scales: { ...sharedOptions.scales, y: { ...sharedOptions.scales.y, ticks: { ...sharedOptions.scales.y.ticks, callback: val => '₹' + val.toLocaleString('en-IN') } } } }
+    });
+  } catch(e) {}
+}
+
+let allPendingMakeups = [];
+
+async function loadPendingMakeups() {
+  try {
+    const params = new URLSearchParams({ action: 'getreschedules', teacherId: currentTeacher.id });
+    const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    const result = await res.json();
+    if (result.success) {
+      allPendingMakeups = (result.pending || []).filter(m => m.daysLeft === undefined || m.daysLeft > 0);
+    }
+  } catch(e) { allPendingMakeups = []; }
+  renderMakeupsButton();
+}
+
+function renderMakeupsButton() {
+  const badge = document.getElementById('pmb-badge');
+  const subText = document.getElementById('pmb-sub-text');
+  const count = allPendingMakeups.length;
+  if (count === 0) {
+    badge.style.display = 'none';
+    subText.textContent = 'No pending makeups';
+  } else {
+    badge.style.display = 'flex';
+    badge.textContent = count;
+    subText.textContent = `${count} session${count > 1 ? 's' : ''} awaiting makeup`;
+  }
+}
+
+function toggleMakeupsPanel() {
+  const btn = document.getElementById('pending-makeups-btn');
+  const panel = document.getElementById('makeups-panel');
+  if (panel.classList.contains('show')) {
+    panel.classList.remove('show');
+    btn.classList.remove('open');
+  } else {
+    renderMakeupsPanel();
+    panel.classList.add('show');
+    btn.classList.add('open');
+  }
+}
+
+let selectedMakeup = null;
+function renderMakeupsPanel() {
+  const list = document.getElementById('makeups-panel-list');
+  list.innerHTML = '';
+  document.getElementById('makeup-log-form').style.display = 'none';
+  selectedMakeup = null;
+
+  if (allPendingMakeups.length === 0) {
+    list.innerHTML = '<div class="makeups-empty">No pending makeups 🎉</div>';
+    return;
+  }
+
+  allPendingMakeups.forEach((m, idx) => {
+    let daysClass = 'ok';
+    let daysLabel = m.daysLeft !== null ? `${m.daysLeft}d left` : '—';
+    if (m.daysLeft <= 0) { daysClass = 'expired'; daysLabel = 'Expired'; }
+    else if (m.daysLeft <= 7) { daysClass = 'urgent'; }
+    else if (m.daysLeft <= 17) { daysClass = 'warning'; }
+
+    const origFormatted = formatDateDisplay(m.originalDate);
+    const item = document.createElement('div');
+    item.className = 'makeup-item';
+    item.id = `makeup-item-${idx}`;
+    item.style.cursor = 'pointer';
+    item.innerHTML = `
+      <div class="makeup-flag">${m.flag}</div>
+      <div class="makeup-info">
+        <div class="makeup-name">${m.student}</div>
+        <div class="makeup-meta">Rescheduled from ${origFormatted}</div>
+      </div>
+      <div class="makeup-days ${daysClass}">${daysLabel}</div>
+    `;
+    item.onclick = () => selectMakeupItem(m, idx);
+    list.appendChild(item);
+  });
+}
+
+function selectMakeupItem(m, idx) {
+  document.querySelectorAll('.makeup-item').forEach(el => { el.style.borderColor = 'var(--border)'; el.style.background = 'var(--white)'; });
+  document.getElementById(`makeup-item-${idx}`).style.borderColor = 'var(--gold-light)';
+  document.getElementById(`makeup-item-${idx}`).style.background = '#fffbf4';
+
+  selectedMakeup = m;
+  document.getElementById('makeup-form-student-label').textContent = `${m.student} · Rescheduled from ${formatDateDisplay(m.originalDate)}`;
+  document.getElementById('makeup-covered').value = '';
+  document.getElementById('makeup-homework').value = '';
+  document.getElementById('makeup-stage-select').value = '';
+  document.getElementById('makeup-submit-btn').disabled = false;
+  document.getElementById('makeup-submit-btn').textContent = 'Log Makeup & Generate Update ✦';
+  document.getElementById('makeup-log-form').style.display = 'block';
+  setTimeout(() => document.getElementById('makeup-log-form').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+async function submitMakeupLog() {
+  if (!selectedMakeup) return;
+  const covered = document.getElementById('makeup-covered').value.trim();
+  const homework = document.getElementById('makeup-homework').value.trim();
+  const stage = document.getElementById('makeup-stage-select').value;
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const dateDisplay = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  const btn = document.getElementById('makeup-submit-btn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  const sObj = currentTeacher.students.find(s => s.id === selectedMakeup.studentId);
+  const payload = {
+    teacherId: currentTeacher.id,
+    studentId: selectedMakeup.studentId,
+    subject: sObj ? sObj.subject : 'Piano',
+    classType: 'Regular',
+    date: dateStr,
+    time: timeStr,
+    status: 'Attended',
+    covered: covered,
+    homework: homework,
+    stage: stage,
+    isMakeup: true,
+    originalRescheduleDate: selectedMakeup.originalDate
+  };
+
+  try {
+    const result = await postData(payload);
+    if (!result || !result.success) throw new Error(result.error);
+    
+    const studentName = selectedMakeup.student;
+    allPendingMakeups = allPendingMakeups.filter(m => !(m.studentId === selectedMakeup.studentId && m.originalDate === selectedMakeup.originalDate));
+    
+    const divider = '━━━━━━━━━━━━━━━';
+    const formatBullets = (txt) => txt ? txt.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n') : '';
+    const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
+    
+    let msg = `Hi,\nHere's an update of ${studentName}'s *makeup session* on ${dateDisplay} 🎹\n`;
+    if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
+    if (covered) msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
+    if (homework) msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
+    if (result.showFooter) {
+      msg += `\nRemaining Classes: ${result.remainingClasses}\nRescheduled: ${result.rescheduledCount}/3\n`;
+    }
+    msg += `\nRegards ,\n${currentTeacher.name}`;
+    waMessage = msg;
+
+    document.getElementById('wa-preview').textContent = msg;
+    document.getElementById('wa-section').classList.add('show');
+    selectedMakeup = null;
+    document.getElementById('makeup-log-form').style.display = 'none';
+    renderMakeupsButton(); renderMakeupsPanel();
+    if (allPendingMakeups.length === 0) {
+      document.getElementById('makeups-panel').classList.remove('show');
+      document.getElementById('pending-makeups-btn').classList.remove('open');
+    }
+    showToast(`✓ Makeup logged for ${studentName}`);
+    setTimeout(() => document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Log Makeup & Generate Update ✦';
+    showToast('Save failed. Try again.', true);
+  }
+}
+
+function formatDateDisplay(dateVal) {
+  if (!dateVal) return '—';
+  return new Date(dateVal).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
 
 function renderStudents() {
   const grid = document.getElementById('student-grid');
   grid.innerHTML = '';
 
-  assignedStudents.forEach(student => {
+  currentTeacher.students.forEach(student => {
+    const initials = student.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const submittedStatus = submittedToday[student.id];
+    const isPaused = pausedStudents[student.id];
+    const pauseUsed = pauseUsedStudents[student.id];
+
     const card = document.createElement('div');
-    card.className = 'student-card';
+    if (isPaused) { card.className = 'student-card on-pause'; }
+    else if (submittedStatus && submittedStatus !== 'Rescheduled') { card.className = `student-card submitted att-done-${submittedStatus.toLowerCase()}`; }
+    else { card.className = 'student-card'; }
+    
     card.id = `card-${student.id}`;
-    card.onclick = () => selectStudent(student);
+    if (!isPaused && !(submittedStatus && submittedStatus !== 'Rescheduled')) {
+      card.onclick = () => selectStudent(student.id);
+    }
 
-    const remainingClass = student.remaining <= 1 ? 'metric-alert' : '';
+    let rightSlot = '';
+    if (isPaused) {
+      rightSlot = `<span class="pause-badge">Paused till ${isPaused}</span>`;
+    } else if (submittedStatus && submittedStatus !== 'Rescheduled') {
+      rightSlot = `<span class="submitted-badge">${submittedStatus}</span>`;
+    } else {
+      const pauseBtn = !pauseUsed ? `<button class="pause-btn" onclick="openPauseModal(event, '${student.id}')">Pause</button>` : '';
+      rightSlot = `<button class="reschedule-btn" onclick="openRescheduleModal(event, '${student.id}')">Reschedule</button>${pauseBtn}<div class="student-check" id="check-${student.id}">${selectedStudentId === student.id ? '✓' : ''}</div>`;
+    }
 
-    card.innerHTML = `
-      <div class="student-name">${student.name}</div>
-      <div class="tag-row">
-        <span class="tag">${student.subject}</span>
-        <span class="tag">${student.mode}</span>
-      </div>
-      <div class="metrics">
-        <span class="${remainingClass}">${student.remaining} Classes Left</span>
-        <span>${student.makeups} Pending Makeups</span>
-      </div>
-    `;
+    card.innerHTML = `<div class="student-avatar">${initials}</div><div class="student-info"><div class="student-name">${student.name}</div></div>${rightSlot}`;
     grid.appendChild(card);
   });
 }
 
-function selectStudent(student) {
-  selectedStudent = student;
-  selectedStatus = null;
+function selectStudent(studentId) {
+  selectedStudentId = studentId; selectedStatus = null;
+  document.getElementById('covered-note').value = ''; document.getElementById('homework-note').value = '';
+  document.getElementById('stage-select').value = ''; document.getElementById('wa-section').classList.remove('show');
   document.querySelectorAll('.student-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById(`card-${student.id}`).classList.add('selected');
-  document.querySelectorAll('.att-btn').forEach(b => b.classList.remove('selected'));
-  
-  document.getElementById('wa-section').classList.remove('show');
-  document.getElementById('covered-note').value = '';
-  document.getElementById('homework-note').value = '';
-  document.getElementById('stage-note').value = '';
-  
+  document.getElementById(`card-${studentId}`).classList.add('selected');
+  document.querySelectorAll('[id^="check-"]').forEach(el => el.textContent = '');
+  if(document.getElementById(`check-${studentId}`)) document.getElementById(`check-${studentId}`).textContent = '✓';
+  document.querySelectorAll('.att-btn').forEach(b => b.className = 'att-btn');
+  document.getElementById('att-error').classList.remove('show');
   document.getElementById('log-form').style.display = 'block';
-  document.getElementById('log-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(() => document.getElementById('log-form').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
 function selectAttendance(btn) {
-  document.querySelectorAll('.att-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.att-btn').forEach(b => b.className = 'att-btn');
   selectedStatus = btn.dataset.status;
-  btn.classList.add('selected');
-  
-  const fields = document.getElementById('fields-section');
-  if (selectedStatus === 'LMC' || selectedStatus === 'Rescheduled') {
-    fields.style.display = 'none';
-  } else {
-    fields.style.display = 'block';
-  }
+  btn.classList.add(`selected-${selectedStatus.toLowerCase()}`);
+  document.getElementById('att-error').classList.remove('show');
 }
 
-async function submitLog() {
-  if (!selectedStudent || !selectedStatus) {
-    showToast('Select a student and attendance status.');
-    return;
-  }
+function openRescheduleModal(event, studentId) {
+  event.stopPropagation(); rescheduleTargetStudentId = studentId;
+  const student = currentTeacher.students.find(s => s.id === studentId);
+  document.getElementById('reschedule-modal-sub').textContent = `Log a rescheduled class for ${student.name}.`;
+  document.getElementById('reschedule-teacher-display').textContent = currentTeacher.name;
+  document.getElementById('reschedule-original-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('reschedule-original-time').value = '';
+  document.getElementById('reschedule-makeup-date').value = '';
+  document.getElementById('reschedule-makeup-time').value = '';
+  document.getElementById('reschedule-error').classList.remove('show');
+  document.getElementById('reschedule-confirm-btn').disabled = false;
+  document.getElementById('reschedule-confirm-btn').textContent = 'Submit ✦';
+  document.getElementById('reschedule-modal').classList.add('show');
+}
 
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.textContent = 'Submitting...';
+function closeRescheduleModal() { document.getElementById('reschedule-modal').classList.remove('show'); rescheduleTargetStudentId = null; }
 
-  const now = new Date();
-  const dateStr = now.toISOString().split('T')[0];
-  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+async function submitReschedule() {
+  const originalDate = document.getElementById('reschedule-original-date').value;
+  const originalTime = document.getElementById('reschedule-original-time').value;
+  const makeupDate = document.getElementById('reschedule-makeup-date').value;
+  const makeupTime = document.getElementById('reschedule-makeup-time').value;
+  const errEl = document.getElementById('reschedule-error');
+
+  if (!originalDate || !originalTime) { errEl.textContent = 'Please fill required fields.'; errEl.classList.add('show'); return; }
+  errEl.classList.remove('show');
+
+  const student = currentTeacher.students.find(s => s.id === rescheduleTargetStudentId);
+  const confirmBtn = document.getElementById('reschedule-confirm-btn');
+  confirmBtn.disabled = true; confirmBtn.textContent = 'Submitting…';
+
+  const origDateFormatted = new Date(originalDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  const origTimeFormatted = formatTime12h(originalTime);
+  const makeupDateFormatted = makeupDate ? new Date(makeupDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Not Decided';
+  const makeupTimeFormatted = makeupTime ? formatTime12h(makeupTime) : 'Not Decided';
 
   const payload = {
     teacherId: currentTeacher.id,
-    studentId: selectedStudent.id,
-    classType: document.getElementById('class-type').value,
-    subject: selectedStudent.subject, // Hidden from UI, pulled directly from data
-    date: dateStr,
-    time: timeStr,
-    status: selectedStatus,
-    covered: document.getElementById('covered-note').value.trim(),
-    homework: document.getElementById('homework-note').value.trim(),
-    stage: document.getElementById('stage-note').value,
-    isMakeup: false
+    studentId: student.id,
+    subject: student.subject,
+    classType: 'Regular',
+    status: 'Rescheduled',
+    originalDate: originalDate,
+    date: origDateFormatted,
+    time: origTimeFormatted,
+    makeupDate: makeupDate,
+    makeupTime: makeupTime
   };
 
   try {
-    const fd = new FormData();
-    fd.append('data', JSON.stringify(payload));
-    
-    const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: fd });
-    const result = await res.json();
-
-    if (result.success) {
-      showToast(`Class logged for ${selectedStudent.name}`);
-      
-      // Update local metrics temporarily so UI feels fast
-      if (selectedStatus === 'Attended' || selectedStatus === 'LMC') selectedStudent.remaining--;
-      if (selectedStatus === 'Rescheduled') selectedStudent.makeups++;
-      renderStudents();
-      document.getElementById(`card-${selectedStudent.id}`).classList.add('selected');
-
-      generateWhatsApp(payload, selectedStudent.name, now);
-      
-      document.getElementById('log-form').style.display = 'none';
-      selectedStatus = null;
-    } else {
-      showToast('Error: ' + result.error);
-    }
-  } catch (e) {
-    showToast('Connection error. Try again.');
+    const result = await postData(payload);
+    if (!result || !result.success) throw new Error();
+    pendingReschedulesMap[student.id] = (pendingReschedulesMap[student.id] || 0) + 1;
+    let msg = `Hi,\n*${student.name}'s* session on *${origDateFormatted} at ${origTimeFormatted}* is rescheduled.\n\n📅 *Makeup Class*\nDate: ${makeupDateFormatted}\nTime: ${makeupTimeFormatted}\n\nRegards,\n${currentTeacher.name}`;
+    waMessage = msg;
+    document.getElementById('wa-preview').textContent = msg;
+    document.getElementById('wa-section').classList.add('show');
+    closeRescheduleModal(); renderStudents(); showToast(`✓ ${student.name} logged as rescheduled`);
+    setTimeout(() => document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+  } catch(e) {
+    confirmBtn.disabled = false; confirmBtn.textContent = 'Submit ✦';
+    errEl.textContent = 'Connection error.'; errEl.classList.add('show');
   }
-  
-  btn.disabled = false;
-  btn.textContent = 'Log Class';
 }
 
-function generateWhatsApp(payload, studentName, dateObj) {
-  if (payload.status === 'LMC') {
-    waMessage = `Hi,\n${studentName}'s class today was cancelled last minute.\n\nRegards,\n${currentTeacher.name}`;
-  } else if (payload.status === 'Rescheduled') {
-    waMessage = `Hi,\n${studentName}'s session today has been marked to be rescheduled. We will coordinate a makeup date soon.\n\nRegards,\n${currentTeacher.name}`;
-  } else {
-    const dateDisplay = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-    const formatBullets = (txt) => txt ? txt.split('\n').map(l => '- ' + l).join('\n') : '';
+function formatTime12h(timeStr) {
+  if (!timeStr) return '';
+  const [h, m] = timeStr.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+function openPauseModal(event, studentId) {
+  event.stopPropagation(); pauseTargetStudentId = studentId;
+  const student = currentTeacher.students.find(s => s.id === studentId);
+  document.getElementById('pause-modal-sub').textContent = `Set the pause window for ${student.name}. Maximum 31 days. This can only be used once per year.`;
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById('pause-start').value = todayStr; document.getElementById('pause-start').min = todayStr;
+  const defaultEnd = new Date(); defaultEnd.setDate(defaultEnd.getDate() + 7);
+  document.getElementById('pause-end').value = defaultEnd.toISOString().split('T')[0];
+  updateEndDateMax();
+  document.getElementById('pause-error').classList.remove('show');
+  document.getElementById('pause-confirm-btn').disabled = false;
+  document.getElementById('pause-modal').classList.add('show');
+}
+
+function closePauseModal() { document.getElementById('pause-modal').classList.remove('show'); pauseTargetStudentId = null; }
+
+function updateEndDateMax() {
+  const startVal = document.getElementById('pause-start').value; if (!startVal) return;
+  const maxEnd = new Date(startVal); maxEnd.setDate(maxEnd.getDate() + 31);
+  document.getElementById('pause-end').max = maxEnd.toISOString().split('T')[0];
+  const minEnd = new Date(startVal); minEnd.setDate(minEnd.getDate() + 1);
+  document.getElementById('pause-end').min = minEnd.toISOString().split('T')[0];
+}
+
+function onPauseStartChange() { updateEndDateMax(); validatePauseDates(); }
+function onPauseEndChange() { validatePauseDates(); }
+
+function validatePauseDates() {
+  const startVal = document.getElementById('pause-start').value; const endVal = document.getElementById('pause-end').value;
+  const errEl = document.getElementById('pause-error');
+  if (!startVal || !endVal) return;
+  if (new Date(endVal) <= new Date(startVal) || (new Date(endVal) - new Date(startVal))/(1000*60*60*24) > 31) {
+    errEl.textContent = 'Invalid dates.'; errEl.classList.add('show');
+    document.getElementById('pause-confirm-btn').disabled = true; return;
+  }
+  errEl.classList.remove('show'); document.getElementById('pause-confirm-btn').disabled = false;
+}
+
+async function submitPause() {
+  const startVal = document.getElementById('pause-start').value; const endVal = document.getElementById('pause-end').value;
+  const errEl = document.getElementById('pause-error');
+  if (!startVal || !endVal) return;
+  const student = currentTeacher.students.find(s => s.id === pauseTargetStudentId);
+  const confirmBtn = document.getElementById('pause-confirm-btn');
+  confirmBtn.disabled = true; confirmBtn.textContent = 'Saving…';
+
+  try {
+    const result = await postData({ action: 'pause', studentId: student.id, teacherId: currentTeacher.id, pauseStart: startVal, pauseEnd: endVal });
+    if (result.success) {
+      const endFormatted = new Date(endVal).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      pausedStudents[student.id] = endFormatted; pauseUsedStudents[student.id] = true;
+      waMessage = `*Important Update ❗️*\n\nHello,\n\n${student.name}'s piano classes are paused from *${new Date(startVal).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} to ${endFormatted}*.\n\nPlease note that no more pauses are available this year.`;
+      document.getElementById('wa-preview').textContent = waMessage; document.getElementById('wa-section').classList.add('show');
+      setTimeout(() => document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+      closePauseModal(); renderStudents(); document.getElementById('log-form').style.display = 'none'; selectedStudentId = null;
+      showToast(`⏸ ${student.name} paused`);
+    } else { throw new Error(result.error); }
+  } catch(e) { errEl.textContent = 'Error: ' + e.message; errEl.classList.add('show'); confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm Pause'; }
+}
+
+async function submitLog() {
+  if (!selectedStudentId) return;
+  if (!selectedStatus) { document.getElementById('att-error').classList.add('show'); return; }
+
+  const student = currentTeacher.students.find(s => s.id === selectedStudentId);
+  const covered = document.getElementById('covered-note').value.trim();
+  const homework = document.getElementById('homework-note').value.trim();
+  const stage = document.getElementById('stage-select').value;
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const dateDisplay = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  const payload = {
+    teacherId: currentTeacher.id,
+    studentId: student.id,
+    subject: student.subject,
+    classType: 'Regular',
+    date: dateStr, time: timeStr, status: selectedStatus,
+    covered: covered, homework: homework, stage: stage
+  };
+
+  try {
+    const result = await postData(payload);
+    if (!result || !result.success) throw new Error(result.error);
     
-    let msg = `Hi,\nHere is an update for ${studentName}'s session on ${dateDisplay}.\n`;
-    if (payload.stage) msg += `\nLevel: ${payload.stage}\n`;
-    if (payload.covered) msg += `\nCovered Today:\n${formatBullets(payload.covered)}\n`;
-    if (payload.homework) msg += `\nPractice Notes:\n${formatBullets(payload.homework)}\n`;
+    if (selectedStatus === 'Rescheduled') {
+      btn.disabled = false; btn.textContent = 'Log Class & Generate Update ✦';
+      document.getElementById('log-form').style.display = 'none'; document.getElementById('wa-section').classList.remove('show');
+      submittedToday[student.id] = 'Rescheduled'; selectedStudentId = null; selectedStatus = null;
+      pendingReschedulesMap[student.id] = (pendingReschedulesMap[student.id] || 0) + 1;
+      renderStudents(); showToast(`✓ ${student.name} logged as rescheduled`); return;
+    }
+
+    submittedToday[student.id] = selectedStatus;
+    const divider = '━━━━━━━━━━━━━━━';
+    const formatBullets = (txt) => txt ? txt.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n') : '';
+    const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
+
+    let msg = `Hi,\nHere's an update of ${student.name}'s session on ${dateDisplay} 🎹\n`;
+    if (stageDisplay) msg += `\n 📌Current Stage: ${stageDisplay}\n`;
+    if (covered) msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
+    if (homework) msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
+    if (result.showFooter) msg += `\nRemaining Classes: ${result.remainingClasses}\nRescheduled: ${result.rescheduledCount}/3\n`;
+
+    const pendingMakeups = allPendingMakeups.filter(m => m.studentId === student.id && m.daysLeft > 0);
+    if (pendingMakeups.length > 0) {
+      msg += `\n${divider}\n⏰ *Pending Makeup Class${pendingMakeups.length > 1 ? 'es (' + pendingMakeups.length + ')' : ''}*\n`;
+      pendingMakeups.forEach(m => { msg += `- Rescheduled from ${formatDateDisplay(m.originalDate)} — expiring in *${m.daysLeft} day${m.daysLeft === 1 ? '' : 's'}*\n`; });
+      msg += `${divider}\n`;
+    }
     msg += `\nRegards,\n${currentTeacher.name}`;
     waMessage = msg;
+
+    document.getElementById('wa-preview').textContent = msg; document.getElementById('wa-section').classList.add('show');
+    btn.disabled = false; btn.textContent = 'Log Class & Generate Update ✦';
+    document.getElementById('log-form').style.display = 'none';
+    selectedStudentId = null; selectedStatus = null;
+    renderStudents(); showToast(`✓ ${student.name} logged as ${payload.status.toLowerCase()}`);
+    document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Log Class & Generate Update ✦';
+    showToast('Save failed: ' + e.message, true);
   }
-  
-  document.getElementById('wa-preview').textContent = waMessage;
-  document.getElementById('wa-section').classList.add('show');
-  document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
+function openWhatsApp() { window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank'); }
 function copyMessage() {
-  navigator.clipboard.writeText(waMessage).then(() => showToast('Copied to clipboard!'));
+  if (!waMessage) return;
+  navigator.clipboard.writeText(waMessage).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.innerHTML = `Copied!`;
+    setTimeout(() => { btn.innerHTML = `Copy Message`; }, 2500);
+  }).catch(() => showToast('Could not copy'));
 }
-
-function openWhatsApp() {
-  window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
-}
-
-function showToast(msg) {
+function showToast(msg, isError) {
   const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
+  toast.textContent = msg; toast.className = 'toast' + (isError ? ' error' : '');
+  toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3500);
 }
 </script>
 </body>
