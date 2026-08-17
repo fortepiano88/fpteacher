@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fortepiano — Teacher App (Staging)</title>
+<title>Fortepiano — Teacher App </title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -170,7 +170,6 @@
   .att-btn:hover { border-color: var(--gold-light); color: var(--ink); }
   .att-btn.selected-attended { background: #f0faf0; border-color: var(--sage); color: var(--sage); }
   .att-btn.selected-absent { background: #fdf4f2; border-color: var(--rust); color: var(--rust); }
-  .att-btn.selected-lmc { background: #fdf4f2; border-color: var(--rust); color: var(--rust); }
 
   .field-group { margin-bottom: 20px; }
   .field-label {
@@ -419,7 +418,6 @@
 <div id="loading-screen">
   <div class="loading-brand">Fortepiano</div>
   <div class="loading-spinner"></div>
-  <div class="staging-banner">⚠ Staging — uuuu</div>
 </div>
 
 <div id="not-found">
@@ -522,24 +520,23 @@
       <div id="makeup-log-form" style="display:none; margin-top:14px; border-top:1.5px solid #e8b86d; padding-top:14px;">
         <div class="section-label" style="margin-bottom:10px;">Log Makeup Class — <span id="makeup-form-student-label" style="text-transform:none; letter-spacing:0; font-weight:600; color:var(--ink);"></span></div>
 
-<div id="fields-section">
         <div class="select-group">
           <label class="field-label">Stage</label>
-          <select id="stage-select">
+          <select id="makeup-stage-select">
             <option value="">Select Stage</option>
           </select>
         </div>
 
         <div class="field-group">
-          <label class="field-label">What was covered today</label>
-          <textarea id="covered-note" rows="3" placeholder="e.g. Hanon Ex. 3–4, worked on dynamics in piece B, hands-together practice…"></textarea>
+          <label class="field-label">What was covered</label>
+          <textarea id="makeup-covered" rows="3" placeholder="e.g. Hanon Ex. 3–4, hands-together practice…"></textarea>
         </div>
 
         <div class="field-group">
           <label class="field-label">Homework / Practice Instructions</label>
-          <textarea id="homework-note" rows="3" placeholder="e.g. Practice bars 5–12 of piece A, 10 mins Hanon Ex. 3 daily…"></textarea>
+          <textarea id="makeup-homework" rows="3" placeholder="e.g. Practice bars 5–12 daily…"></textarea>
         </div>
-      </div>
+
         <button class="submit-btn" id="makeup-submit-btn" onclick="submitMakeupLog()">
           Log Makeup &amp; Generate Update ✦
         </button>
@@ -568,9 +565,9 @@
           <button class="att-btn" data-status="Attended" onclick="selectAttendance(this)">
             <span class="att-icon">✅</span>Attended
           </button>
-          <button class="att-btn" data-status="LMC" onclick="selectAttendance(this)">
-  <span class="att-icon">🚫</span>LMC
-</button>
+          <button class="att-btn" data-status="Absent" onclick="selectAttendance(this)">
+            <span class="att-icon">❌</span>Absent
+          </button>
         </div>
         <div class="error-msg" id="att-error">Please select attendance status</div>
       </div>
@@ -596,7 +593,7 @@
         Log Class &amp; Generate Update ✦
       </button>
     </div>
- </div>
+
     <div class="wa-section" id="wa-section">
       <div class="wa-title">
         💬
@@ -621,7 +618,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4GZbhz7VmpfEKWTlvYS2CXtQlUpZl9UWKtDwsAyIKJCu8xt_zImix_tfKn30XrQWQhg/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz91XC4bnb07-XqbPbvazANrgSTAqI-VRcvxrENYmz3t23mM1aZ1zvRiPMvu9ZRW53X/exec';
 
 let currentTeacher = null;
 let selectedStudentId = null;
@@ -1045,26 +1042,24 @@ const dateDisplay = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'lo
     document.getElementById('makeups-panel').classList.remove('show');
     document.getElementById('pending-makeups-btn').classList.remove('open');
   }
- showToast(`✓ Makeup class logged for ${studentName}`);
+  showToast(`✓ Makeup class logged for ${studentName}`);
   setTimeout(() => {
     document.getElementById('wa-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 100);
-
-  if (result.showFooter) {
-    setTimeout(async () => {
-      try {
-        const params = new URLSearchParams({ action: 'termstats', student: studentName });
-        const freshRes = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
-        const freshResult = await freshRes.json();
-        if (freshResult.success) {
-          const freshFooter = `\nRemaining Classes: ${freshResult.remainingClasses}\nRescheduled: ${freshResult.rescheduledCount}/3\n`;
-          waMessage = waMessage.replace(/\nRemaining Classes:.*\nRescheduled:.*\/3\n/s, freshFooter);
-          document.getElementById('wa-preview').textContent = waMessage;
-        }
-      } catch(e) { /* silent */ }
-    }, 2000);
-  }
 }
+  setTimeout(async () => {
+  try {
+    const params = new URLSearchParams({ action: 'termstats', student: studentName });
+    const freshRes = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+    const freshResult = await freshRes.json();
+    if (freshResult.success) {
+      const freshFooter = `\nRemaining Classes: ${freshResult.remainingClasses}\nRescheduled: ${freshResult.rescheduledCount}/3\n`;
+      waMessage = waMessage.replace(/\nRemaining Classes:.*\nRescheduled:.*\/3\n/s, freshFooter);
+      document.getElementById('wa-preview').textContent = waMessage;
+    }
+  } catch(e) { /* silent */ }
+}, 2000);
+
 function formatDateDisplay(dateVal) {
   if (!dateVal) return '—';
   const d = new Date(dateVal);
@@ -1135,7 +1130,6 @@ function selectStudent(studentId) {
   document.getElementById('covered-note').value  = '';
   document.getElementById('homework-note').value = '';
   document.getElementById('stage-select').value  = '';
-  document.getElementById('fields-section').style.display = 'block';
   document.getElementById('wa-section').classList.remove('show');
 
   document.querySelectorAll('.student-card').forEach(c => c.classList.remove('selected'));
@@ -1160,12 +1154,6 @@ function selectAttendance(btn) {
   selectedStatus = btn.dataset.status;
   btn.classList.add(`selected-${selectedStatus.toLowerCase()}`);
   document.getElementById('att-error').classList.remove('show');
-    const fieldsSection = document.getElementById('fields-section');
-  if (selectedStatus === 'LMC') {
-    fieldsSection.style.display = 'none';
-  } else {
-    fieldsSection.style.display = 'block';
-  }
 }
 
 // ─── Reschedule Modal ─────────────────────────────────────────────────────────
@@ -1450,10 +1438,6 @@ async function submitLog() {
     document.getElementById('att-error').classList.add('show');
     return;
   }
-  if (selectedStatus === 'LMC') {
-    const confirmed = confirm(`Mark this class as a Last Minute Cancellation?\n\nThis will count as a delivered class and cannot be undone.`);
-    if (!confirmed) return;
-  }
 
   const student  = currentTeacher.students.find(s => s.id === selectedStudentId);
   const covered  = document.getElementById('covered-note').value.trim();
@@ -1531,37 +1515,35 @@ const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-d
     return text.split('\n').filter(l => l.trim()).map(l => '- ' + l.trim()).join('\n');
   };
 
-const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
+  const stageDisplay = stage ? stage.replace(/_/g, ' ') : '';
 
   let msg = 'Hi,\n';
-  if (submittedStatus2 === 'LMC') {
-    msg += `${student.name}'s class on ${dateDisplay} was cancelled last minute.\n`;
-  } else {
-    msg += `Here's an update of ${student.name}'s session on ${dateDisplay} 🎹\n`;
-    if (stageDisplay) msg += `\n📌 Current Stage: ${stageDisplay}\n`;
-    if (covered) {
-      msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
-    }
-    if (homework) {
-      msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
-    }
-    const pendingMakeups = allPendingMakeups.filter(m => m.student === student.name && (m.daysLeft === undefined || m.daysLeft > 0));
-    if (pendingMakeups.length > 0) {
-      msg += `\n${divider}\n`;
-      msg += `⏰ *Pending Makeup Class${pendingMakeups.length > 1 ? 'es (' + pendingMakeups.length + ')' : ''}*\n`;
-      pendingMakeups.forEach(m => {
-        msg += `- Rescheduled from ${formatDateDisplay(m.originalDate)} — expiring in *${m.daysLeft} day${m.daysLeft === 1 ? '' : 's'}*\n`;
-      });
-      msg += `${divider}\n`;
-    }
+  msg += `Here's an update of ${student.name}'s session on ${dateDisplay} 🎹\n`;
+  if (stageDisplay) msg += `\n 📌Current Stage: ${stageDisplay}\n`;
+  if (covered) {
+    msg += `${divider}\n📖 *What We Covered*\n${divider}\n${formatBullets(covered)}\n`;
   }
-
+  if (homework) {
+    msg += `${divider}\n🏠 *Practice This Week*\n${divider}\n${formatBullets(homework)}\n${divider}\n`;
+  }
   if (footerData) {
     msg += `\nRemaining Classes: ${footerData.remaining}\n`;
     msg += `Rescheduled: ${footerData.rescheduled}/3\n`;
   }
 
+  const pendingMakeups = allPendingMakeups.filter(m => m.student === student.name && m.daysLeft > 0);
+  if (pendingMakeups.length > 0) {
+    msg += `\n${divider}\n`;
+    msg += `⏰ *Pending Makeup Class${pendingMakeups.length > 1 ? 'es (' + pendingMakeups.length + ')' : ''}*\n`;
+    pendingMakeups.forEach(m => {
+      msg += `- Rescheduled from ${formatDateDisplay(m.originalDate)} — expiring in *${m.daysLeft} day${m.daysLeft === 1 ? '' : 's'}*\n`;
+    });
+    msg += `${divider}\n`;
+  }
+
   msg += `\nRegards,\n${currentTeacher.name}`;
+  waMessage = msg;
+
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
 
