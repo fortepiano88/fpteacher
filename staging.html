@@ -630,6 +630,7 @@ let pendingReschedulesMap = {};
 let pauseTargetStudentId = null;
 let rescheduleTargetStudentId = null;
 let waMessage = '';
+let lastLoggedStudentName = '';
 
 // ─── postData ─────────────────────────────────────────────────────────────────
 // Sends the payload as FormData so the browser does NOT strip Content-Type via
@@ -1032,6 +1033,7 @@ const dateDisplay = now.toLocaleDateString('en-IN', { day: 'numeric', month: 'lo
   }
   msg += `\nRegards ,\n${currentTeacher.name}`;
   waMessage = msg;
+  lastLoggedStudentName = student.name; 
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
   selectedMakeup = null;
@@ -1267,6 +1269,7 @@ async function submitReschedule() {
   msg += `Time: ${makeupTimeFormatted}\n\n`;
   msg += `Regards,\n${currentTeacher.name}`;
   waMessage = msg;
+  lastLoggedStudentName = student.name; 
 
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
@@ -1403,6 +1406,7 @@ async function submitPause() {
 
       let msg = `*Important Update ❗️*\n\nHello,\n\n${student.name}'s piano classes are paused from *${startFormatted} to ${endFormatted}*.\n\nPlease note that no more pauses are available this year.`;
       waMessage = msg;
+      lastLoggedStudentName = student.name; 
 
       document.getElementById('wa-preview').textContent = msg;
       document.getElementById('wa-section').classList.add('show');
@@ -1543,6 +1547,7 @@ const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-d
 
   msg += `\nRegards,\n${currentTeacher.name}`;
   waMessage = msg;
+  lastLoggedStudentName = student.name; 
 
   document.getElementById('wa-preview').textContent = msg;
   document.getElementById('wa-section').classList.add('show');
@@ -1575,23 +1580,33 @@ const timeStr  = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-d
 }
 // ─── WhatsApp / Copy ──────────────────────────────────────────────────────────
 
-function openWhatsApp() {
-  window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
-}
+async function openWhatsApp() {
+  const btn = document.querySelector('.wa-btn');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Sending…';
+  btn.disabled = true;
 
-function copyMessage() {
-  if (!waMessage) return;
-  navigator.clipboard.writeText(waMessage).then(() => {
-    const btn = document.getElementById('copy-btn');
-    btn.classList.add('copied');
-    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
-    setTimeout(() => {
-      btn.classList.remove('copied');
-      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Message`;
-    }, 2500);
-  }).catch(() => {
-    showToast('Could not copy — try manually selecting the text');
-  });
+  try {
+    const result = await postData({
+      action:  'sendwhatsapp',
+      student: lastLoggedStudentName,
+      message: waMessage
+    });
+    if (result && result.success) {
+      showToast('✓ Sent to WhatsApp');
+      btn.innerHTML = '✓ Sent';
+    } else {
+      showToast('Auto-send failed — opening manually: ' + (result && result.error ? result.error : ''), true);
+      window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+  } catch (e) {
+    showToast('Connection error — opening manually', true);
+    window.open(`https://wa.me/?text=${encodeURIComponent(waMessage)}`, '_blank');
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
 }
 
 function showToast(msg, isError) {
